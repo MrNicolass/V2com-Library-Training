@@ -45,15 +45,6 @@ public class UserController {
     }
 
     @GET
-    public Response getAllUsers() {
-        try {
-            return Response.ok(userService.getAllUsers()).build();
-        } catch (Exception e) {
-            return Response.serverError().entity(e.getMessage()).build();
-        }
-    }
-
-    @GET
     @Transactional
     @Path("/{userId}")
     public Response getUserById(@PathParam("userId") UUID userId) {
@@ -66,9 +57,13 @@ public class UserController {
 
     @GET
     @Transactional
-    public List<UserEntity> getUsers(@Context UriInfo uriInfo) {
-        Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
-        return userService.getUserByFilters(filters);
+    public Response getUsersByFilter(@Context UriInfo uriInfo) {
+        try {
+            Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
+            return Response.ok(userService.getUserByFilters(filters)).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
     }
 
     @DELETE

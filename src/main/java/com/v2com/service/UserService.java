@@ -10,7 +10,6 @@ import com.v2com.entity.UserEntity;
 import com.v2com.repository.UserRepository;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
-import io.vertx.mutiny.ext.auth.User;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped

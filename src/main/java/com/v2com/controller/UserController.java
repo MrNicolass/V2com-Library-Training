@@ -1,7 +1,11 @@
 package com.v2com.controller;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import com.v2com.dto.userDTO;
 import com.v2com.entity.UserEntity;
 import com.v2com.service.UserService;
 
@@ -14,9 +18,10 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 @Path("/api/v1/users")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -31,7 +36,7 @@ public class UserController {
 
     @POST
     @Transactional
-    public Response createUser(UserEntity userEntity) {
+    public Response createUser(userDTO userEntity) {
         try {
             return Response.ok(userService.createUser(userEntity)).build();
         } catch (Exception e) {
@@ -61,12 +66,9 @@ public class UserController {
 
     @GET
     @Transactional
-    public Response getUserByFilter(@QueryParam("filterName") String filterName, @QueryParam("filter") String filter) {
-        try {
-            return Response.ok(userService.getUserByFilter(filterName, filter)).build();
-        } catch (Exception e) {
-            return Response.serverError().entity(e.getMessage()).build();
-        }
+    public List<UserEntity> getUsers(@Context UriInfo uriInfo) {
+        Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
+        return userService.getUserByFilters(filters);
     }
 
     @DELETE
@@ -83,9 +85,9 @@ public class UserController {
     @PATCH
     @Transactional
     @Path("/{userId}")
-    public Response updateUser(@PathParam("userId") UUID userId, UserEntity userEntity) {
+    public Response updateUser(@PathParam("userId") UUID userId, userDTO userDTO) {
         try {
-            return Response.ok(userService.updateUser(userId, userEntity)).build();
+            return Response.ok(userService.updateUser(userId, userDTO)).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }

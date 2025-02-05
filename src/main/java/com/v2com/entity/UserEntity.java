@@ -4,9 +4,6 @@ import java.util.UUID;
 
 import com.v2com.entity.enums.UserRole;
 
-import io.smallrye.common.constraint.NotNull;
-import jakarta.annotation.Nullable;
-import jakarta.annotation.Nonnull;
 import jakarta.enterprise.inject.Default;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,12 +29,22 @@ public class UserEntity {
     @Email
     private String email = "";
 
-
     @NotEmpty
     private String password;
 
     @Default
     private UserRole role = UserRole.USER;
+
+    @Override
+    public String toString() {
+        return "UserEntity{" +
+                "userId=" + userId +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", role=" + role +
+                '}';
+    }
 
     //endregion
 
@@ -56,6 +63,15 @@ public class UserEntity {
     //endregion
 
     //region Getters and Setters
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
+
     public String getName() {
         return name;
     }
@@ -90,14 +106,4 @@ public class UserEntity {
 
     //endregion
 
-    @Override
-    public String toString() {
-        return "UserEntity{" +
-                "userId=" + userId +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", role=" + role +
-                '}';
-    }
 }

@@ -1,6 +1,6 @@
 package com.v2com.entity;
 
-import java.util.Date;
+import java.sql.Date;
 import java.util.UUID;
 
 import jakarta.persistence.Entity;
@@ -28,7 +28,7 @@ public class BookEntity {
 
     private String isbn = "";
 
-    private Date publicationDate = new Date();
+    private Date publicationDate;
 
     @NotEmpty
     private Boolean isAvailable;

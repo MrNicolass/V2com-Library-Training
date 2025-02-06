@@ -1,6 +1,6 @@
 package com.v2com.dto;
 
-import java.util.Date;
+import java.sql.Date;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -16,7 +16,7 @@ public class bookDTO {
     private String author;
 
     private String isbn = "";
-    private Date publicationDate = new Date();
+    private Date publicationDate;
 
     @NotEmpty(message = "Availability is required")
     private Boolean isAvailable;

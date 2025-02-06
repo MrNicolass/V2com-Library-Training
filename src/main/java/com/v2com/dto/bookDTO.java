@@ -1,56 +1,37 @@
-package com.v2com.entity;
+package com.v2com.dto;
 
 import java.util.Date;
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 
-@Entity
-@Table(name = "books")
-public class BookEntity {
+public class bookDTO {
 
-    //region Properties
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID bookId;
 
-    @NotEmpty
+    @NotEmpty(message = "Title is required")
     private String title;
 
-    @NotEmpty
+    @NotEmpty(message = "Author is required")
     private String author;
 
     private String isbn = "";
-
     private Date publicationDate = new Date();
 
-    @NotEmpty
+    @NotEmpty(message = "Availability is required")
     private Boolean isAvailable;
 
-    //endregion
-
-    //region Constructors
-
-    public BookEntity() {
+    public bookDTO() {
     }
 
-    public BookEntity(String title, String author, String isbn, Date publicationDate, Boolean isAvailable) {
+    public bookDTO(UUID bookId, String title, String author, String isbn, Date publicationDate, Boolean isAvailable) {
+        this.bookId = bookId;
         this.title = title;
         this.author = author;
         this.isbn = isbn;
         this.publicationDate = publicationDate;
         this.isAvailable = isAvailable;
     }
-
-    //endregion
-    
-    //region Getters and Setters
 
     public UUID getBookId() {
         return bookId;
@@ -99,7 +80,4 @@ public class BookEntity {
     public void setIsAvailable(Boolean isAvailable) {
         this.isAvailable = isAvailable;
     }
-
-    //endregion
-
 }

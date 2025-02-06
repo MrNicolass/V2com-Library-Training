@@ -88,8 +88,8 @@ public class BookService {
                         return book.getIsbn().toString().toUpperCase().contains(filter.getValue());
                     case "publicationDate":
                         return book.getPublicationDate().toString().toUpperCase().contains(filter.getValue());
-                    case "isAvaliable":
-                        return book.getIsAvailable().toString().toUpperCase().equals(filter.getValue());
+                    case "isAvailable":
+                        return Boolean.toString(book.getIsAvailable()).equalsIgnoreCase(filter.getValue());
                     default:
                         return true;
                 }
@@ -97,5 +97,45 @@ public class BookService {
             }).collect(Collectors.toList()), (u1, u2) -> u1);
 
         return books;
+    }
+
+    public bookDTO deleteBook(UUID bookId) {
+        bookDTO book = this.getBookById(bookId);
+
+        if(book != null) {
+            try {
+                BookEntity bookEntity = new BookEntity(book.getTitle(), book.getAuthor(), book.getIsbn(), book.getPublicationDate(), book.getIsAvailable());
+                bookEntity.setBookId(book.getBookId());
+                bookRepository.delete(bookEntity);
+                return book;
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
+            }
+        } else {
+            return book;
+        }
+    }
+
+    public bookDTO updateBook(UUID bookId, bookDTO bookDTO) {
+        BookEntity bookEntity = bookRepository.findById(bookId);
+
+        if(bookEntity != null){
+            try {
+                bookEntity.setTitle(bookDTO.getTitle() != null ? bookDTO.getTitle() : bookEntity.getTitle());
+                bookEntity.setAuthor(bookDTO.getAuthor() != null ? bookDTO.getAuthor() : bookEntity.getAuthor());
+                bookEntity.setIsbn(bookDTO.getIsbn() != null ? bookDTO.getIsbn() : bookEntity.getIsbn());
+                bookEntity.setPublicationDate(bookDTO.getPublicationDate() != null ? bookDTO.getPublicationDate() : bookEntity.getPublicationDate());
+                bookEntity.setIsAvailable(bookDTO.getIsAvailable() != null ? bookDTO.getIsAvailable() : bookEntity.getIsAvailable());
+    
+                bookRepository.persist(bookEntity);
+
+                bookDTO.setBookId(bookId);
+                return bookDTO;
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
+            }
+        } else {
+            return bookDTO;
+        }
     }
 }

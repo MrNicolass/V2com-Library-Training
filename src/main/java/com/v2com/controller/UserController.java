@@ -1,12 +1,11 @@
 package com.v2com.controller;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.v2com.dto.userDTO;
-import com.v2com.entity.UserEntity;
 import com.v2com.service.UserService;
 
 import jakarta.transaction.Transactional;
@@ -71,7 +70,10 @@ public class UserController {
     @Path("/{userId}")
     public Response deleteUser(@PathParam("userId") UUID userId) {
         try {
-            return Response.ok(userService.deleteUser(userId)).build();
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "User deleted!");
+            response.put("user", userService.deleteUser(userId));
+            return Response.ok(response).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }

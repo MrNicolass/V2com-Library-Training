@@ -1,17 +1,18 @@
 package com.v2com.controller;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.v2com.dto.bookDTO;
-import com.v2com.entity.BookEntity;
 import com.v2com.service.BookService;
 
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -55,7 +56,7 @@ public class BookController {
 
     @GET
     @Transactional
-    public Response getBooksByFilter (@Context UriInfo uriInfo) {
+    public Response getBooksByFilter(@Context UriInfo uriInfo) {
         try {
             Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
             return Response.ok(bookService.getBooksByFilters(filters)).build();
@@ -64,4 +65,31 @@ public class BookController {
         }
     }
 
+    @DELETE
+    @Transactional
+    @Path("/{bookId}")
+    public Response deleteBook(@PathParam("bookId") UUID bookId) {
+        try {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Book deleted!");
+            response.put("book", bookService.deleteBook(bookId));
+            return Response.ok(response).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
+
+    @PATCH
+    @Transactional
+    @Path("/{bookId}")
+    public Response updateBook(@PathParam("bookId") UUID bookId, bookDTO bookDTO) {
+        try {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Book updated!");
+            response.put("book", bookService.updateBook(bookId, bookDTO));
+            return Response.ok(response).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
 }

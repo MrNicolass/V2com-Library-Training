@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import com.v2com.entity.enums.LoanStatus;
 
-import io.vertx.mutiny.ext.auth.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

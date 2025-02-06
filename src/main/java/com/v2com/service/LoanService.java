@@ -9,7 +9,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.v2com.dto.LoanDTO;
-import com.v2com.dto.bookDTO;
 import com.v2com.entity.BookEntity;
 import com.v2com.repository.LoanRepository;
 import com.v2com.repository.UserRepository;
@@ -149,12 +148,21 @@ public class LoanService {
 
     public LoanDTO updateLoan(UUID loanId, LoanDTO loanDTO) {
         LoanEntity loanEntity = loanRepository.findById(loanId);
-        BookEntity bookEntity = bookRepository.findById(loanDTO.getBookId());
+        
+        BookEntity bookEntityChange = bookRepository.findById(loanDTO.getBookId());
+        if(bookEntityChange == null){
+            throw new IllegalArgumentException("Book does not exists!");
+        }
+
+        UserEntity userEntityChange = userRepository.findById(loanDTO.getUserId());
+        if(userEntityChange == null){
+            throw new IllegalArgumentException("User does not exists!");
+        }
 
         if(loanEntity != null){
             try {
-                loanEntity.setUser(loanEntity.getUser());
-                loanEntity.setBook(loanEntity.getBook());
+                loanEntity.setUser(userEntityChange != null ? userEntityChange : loanEntity.getUser());
+                loanEntity.setBook(bookEntityChange != null ? bookEntityChange : loanEntity.getBook());
                 loanEntity.setLoanDate(loanDTO.getLoanDate() != null ? loanDTO.getLoanDate() : loanEntity.getLoanDate());
                 loanEntity.setLoanDueDate(loanDTO.getLoanDueDate() != null ? loanDTO.getLoanDueDate() : loanEntity.getLoanDueDate());
                 loanEntity.setReturnDate(loanDTO.getReturnDate() != null ? loanDTO.getReturnDate() : loanEntity.getReturnDate());

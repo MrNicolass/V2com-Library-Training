@@ -1,11 +1,14 @@
 package com.v2com.controller;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.v2com.dto.ReservationDTO;
+import com.v2com.entity.enums.ReservationStatus;
 import com.v2com.service.ReservationService;
 
 import jakarta.transaction.Transactional;
@@ -48,57 +51,57 @@ public class ReservationController {
         }
     }
 
-    // @GET
-    // @Transactional
-    // @Path("/{reservationId}")
-    // public Response getReservationById(@PathParam("reservationId") UUID reservationId){
-    //     try {
-    //         Map<String, Object> response = new HashMap<>();
-    //         response.put("message", "Reservation founded!");
-    //         response.put("reservation", reservationService.getReservationById(reservationId));
-    //         return Response.ok(response).build();
-    //     } catch (Exception e) {
-    //         return Response.serverError().entity(e.getMessage()).build();
-    //     }
-    // }
+    @GET
+    @Transactional
+    @Path("/{reservationId}")
+    public Response getReservationById(@PathParam("reservationId") UUID reservationId){
+        try {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Reservation founded!");
+            response.put("reservation", reservationService.getReservationById(reservationId));
+            return Response.ok(response).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
 
-    // @GET
-    // @Transactional
-    // public Response getReservationsByFilters(@Context UriInfo uriInfo) {
-    //     try {
-    //         Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
-    //         return Response.ok(reservationService.getReservationByFilters(filters)).build();
-    //     } catch (Exception e) {
-    //         return Response.serverError().entity(e.getMessage()).build();
-    //     }
-    // }
+    @GET
+    @Transactional
+    public Response getReservationsByFilters(@Context UriInfo uriInfo) {
+        try {
+            Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
+            return Response.ok(reservationService.getReservationsByFilters(filters)).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
 
-    // @DELETE
-    // @Transactional
-    // @Path("/{reservationId}")
-    // public Response deleteBook(@PathParam("reservationId") UUID reservationId) {
-    //     try {
-    //         Map<String, Object> response = new HashMap<>();
-    //         response.put("message", "reservation deleted!");
-    //         response.put("reservation", reservationService.deleteReservation(reservationId));
-    //         return Response.ok(response).build();
-    //     } catch (Exception e) {
-    //         return Response.serverError().entity(e.getMessage()).build();
-    //     }
-    // }
+    @DELETE
+    @Transactional
+    @Path("/{reservationId}")
+    public Response deleteBook(@PathParam("reservationId") UUID reservationId) {
+        try {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "reservation deleted!");
+            response.put("reservation", reservationService.deleteReservation(reservationId));
+            return Response.ok(response).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
 
-    // @PATCH
-    // @Transactional
-    // @Path("/{reservationId}")
-    // public Response updateReservation(@PathParam("reservationId") UUID reservationId, ReservationDTO ReservationDTO) {
-    //     try {
-    //         Map<String, Object> response = new HashMap<>();
-    //         response.put("message", "Book updated!");
-    //         response.put("book", reservationService.updateReservation(reservationId, ReservationDTO));
-    //         return Response.ok(response).build();
-    //     } catch (Exception e) {
-    //         return Response.serverError().entity(e.getMessage()).build();
-    //     }
-    // }
+    @PATCH
+    @Transactional
+    @Path("/{reservationId}")
+    public Response updateReservation(@PathParam("reservationId") UUID reservationId, ReservationDTO reservationDTO) {
+        try {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Reservation updated!");
+            response.put("reservation", reservationService.updateReservation(reservationId, reservationDTO));
+            return Response.ok(response).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
 
 }

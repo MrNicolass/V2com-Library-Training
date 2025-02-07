@@ -88,7 +88,7 @@ public class LoanService {
         }
     }
 
-    public List<LoanEntity> getLooksByFilters(Map<String, String> filters){
+    public List<LoanEntity> getLoansByFilters(Map<String, String> filters){
         List<LoanEntity> loans = this.getAllLoans();
 
         if (loans.isEmpty()) {

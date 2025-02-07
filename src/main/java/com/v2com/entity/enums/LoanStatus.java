@@ -4,19 +4,19 @@ public enum LoanStatus {
     ACTIVE {
         @Override
         public String toString() {
-            return "USER";
+            return "ACTIVE";
         }
     },
     RETURNED {
         @Override
         public String toString() {
-            return "ADMIN";
+            return "RETURNED";
         }
     },
     LATE {
         @Override
         public String toString() {
-            return "ADMIN";
+            return "LATE";
         }
     }
 }

@@ -6,7 +6,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.v2com.dto.LoanDTO;
-import com.v2com.dto.bookDTO;
 import com.v2com.service.LoanService;
 
 import jakarta.transaction.Transactional;
@@ -66,7 +65,7 @@ public class LoanController {
     public Response getLoansByFilters(@Context UriInfo uriInfo) {
         try {
             Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
-            return Response.ok(loanService.getLooksByFilters(filters)).build();
+            return Response.ok(loanService.getLoansByFilters(filters)).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }

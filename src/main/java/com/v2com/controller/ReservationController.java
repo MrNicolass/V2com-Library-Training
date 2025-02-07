@@ -1,12 +1,15 @@
 package com.v2com.controller;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.v2com.dto.LoanDTO;
-import com.v2com.service.LoanService;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.v2com.dto.ReservationDTO;
+import com.v2com.entity.enums.ReservationStatus;
+import com.v2com.service.ReservationService;
 
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
@@ -22,24 +25,40 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-@Path("/api/v1/loans")
+@Path("api/v1/reservations")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class LoanController {
-    
-    private final LoanService loanService;
+public class ReservationController {
 
-    public LoanController(LoanService loanService){
-        this.loanService = loanService;
+    private final ReservationService reservationService;
+
+    public ReservationController(ReservationService reservationService){
+        this.reservationService = reservationService;
     }
 
     @POST
     @Transactional
-    public Response createLoan(LoanDTO loan){
+    public Response createReservation(ReservationDTO reservation){
         try {
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Loan registered!");
-            response.put("loan", loanService.createLoan(loan));
+            response.put("message", "Reservation registered!");
+            response.put("reservation", reservationService.createReservation(reservation));
+            return Response.ok(response).build();
+        } catch (IllegalArgumentException il) {
+            return Response.serverError().entity(il.getMessage()).build();
+        } catch (Exception e) {
+            return Response.ok().entity(e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Transactional
+    @Path("/{reservationId}")
+    public Response getReservationById(@PathParam("reservationId") UUID reservationId){
+        try {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Reservation founded!");
+            response.put("reservation", reservationService.getReservationById(reservationId));
             return Response.ok(response).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
@@ -48,24 +67,10 @@ public class LoanController {
 
     @GET
     @Transactional
-    @Path("/{loanId}")
-    public Response getLoanById(@PathParam("loanId") UUID loanId){
-        try {
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Loan founded!");
-            response.put("loan", loanService.getLoanById(loanId));
-            return Response.ok(response).build();
-        } catch (Exception e) {
-            return Response.serverError().entity(e.getMessage()).build();
-        }
-    }
-
-    @GET
-    @Transactional
-    public Response getLoansByFilters(@Context UriInfo uriInfo) {
+    public Response getReservationsByFilters(@Context UriInfo uriInfo) {
         try {
             Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
-            return Response.ok(loanService.getLoansByFilters(filters)).build();
+            return Response.ok(reservationService.getReservationsByFilters(filters)).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -73,12 +78,12 @@ public class LoanController {
 
     @DELETE
     @Transactional
-    @Path("/{loanId}")
-    public Response deleteBook(@PathParam("loanId") UUID loanId) {
+    @Path("/{reservationId}")
+    public Response deleteBook(@PathParam("reservationId") UUID reservationId) {
         try {
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Loan deleted!");
-            response.put("loan", loanService.deleteLoan(loanId));
+            response.put("message", "reservation deleted!");
+            response.put("reservation", reservationService.deleteReservation(reservationId));
             return Response.ok(response).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
@@ -87,15 +92,16 @@ public class LoanController {
 
     @PATCH
     @Transactional
-    @Path("/{loanId}")
-    public Response updateLoan(@PathParam("loanId") UUID loanId, LoanDTO loanDTO) {
+    @Path("/{reservationId}")
+    public Response updateReservation(@PathParam("reservationId") UUID reservationId, ReservationDTO reservationDTO) {
         try {
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Book updated!");
-            response.put("book", loanService.updateLoan(loanId, loanDTO));
+            response.put("message", "Reservation updated!");
+            response.put("reservation", reservationService.updateReservation(reservationId, reservationDTO));
             return Response.ok(response).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
     }
+
 }

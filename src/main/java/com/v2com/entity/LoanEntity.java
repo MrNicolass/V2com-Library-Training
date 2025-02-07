@@ -32,7 +32,7 @@ public class LoanEntity {
     private BookEntity book;
 
     @NotNull
-    private Date loanDate;
+    private Date loanDate = new java.sql.Date(System.currentTimeMillis());
     
     //By default, due date is the date when the book as loaned + 30 days
     private Date loanDueDate = new java.sql.Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000);
@@ -67,6 +67,10 @@ public class LoanEntity {
         this.loanDueDate = loanDueDate;
         this.returnDate = returnDate;
         this.loanStatus = loanStatus;
+    }
+
+    public LoanEntity(UserEntity user, BookEntity book) {
+        this(user, book, new java.sql.Date(System.currentTimeMillis()), new java.sql.Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000), null, LoanStatus.ACTIVE);
     }
 
     //endregion

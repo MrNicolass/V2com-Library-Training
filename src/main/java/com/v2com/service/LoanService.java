@@ -1,7 +1,10 @@
 package com.v2com.service;
 
 import com.v2com.entity.LoanEntity;
+import com.v2com.entity.ReservationEntity;
 import com.v2com.entity.UserEntity;
+import com.v2com.entity.enums.LoanStatus;
+import com.v2com.entity.enums.ReservationStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -9,6 +12,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.v2com.dto.LoanDTO;
+import com.v2com.dto.ReservationDTO;
 import com.v2com.entity.BookEntity;
 import com.v2com.repository.LoanRepository;
 import com.v2com.repository.UserRepository;
@@ -22,33 +26,39 @@ public class LoanService {
     private final LoanRepository loanRepository;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
+    private final ReservationService reservationService;
 
-    public LoanService(LoanRepository loanRepository, UserRepository userRepository, BookRepository bookRepository) {
+    public LoanService(LoanRepository loanRepository, UserRepository userRepository, BookRepository bookRepository, ReservationService reservationService) {
         this.loanRepository = loanRepository;
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
+        this.reservationService = reservationService;
     }
 
-    @Transactional
     public LoanDTO createLoan(LoanDTO loanDTO) {
         try {
-            if (loanDTO.getUserId() == null) {
-                throw new IllegalArgumentException("You cannot loan a book without a user assigned!");
-            } else if (loanDTO.getBookId() == null) {
-                throw new IllegalArgumentException("What book do you want to loan? Select at least one!");
-            } else if (loanDTO.getLoanDate() == null) {
-                throw new IllegalArgumentException("When was the book loaned? Fill the date!");
-            }
-
             //Both user and book must exists
             UserEntity userEntity = userRepository.findById(loanDTO.getUserId());
             BookEntity bookEntity = bookRepository.findById(loanDTO.getBookId());
+            UUID locateLoan = loanRepository.findLoadByBookId(loanDTO.getBookId());
+            
+            if (loanDTO.getUserId() == null) {
+                throw new RuntimeException("You cannot loan a book without a user assigned!");
+            } else if (loanDTO.getBookId() == null) {
+                throw new RuntimeException("What book do you want to loan? Select at least one!");
+            } else if (loanDTO.getLoanDate() == null) {
+                throw new RuntimeException("When was the book loaned? Fill the date!");
+            } else if (userEntity == null) {
+                throw new RuntimeException("User not found!");
+            } else if (bookEntity == null) {
+                throw new RuntimeException("Book not found!");
+            } else if (!loanDTO.getBookId().equals(locateLoan)) {
+                ReservationDTO reservDTO = new ReservationDTO();
+                reservDTO.setUserId(loanDTO.getUserId());
+                reservDTO.setBookId(loanDTO.getBookId());
 
-            if (userEntity == null) {
-                throw new IllegalArgumentException("User not found!");
-            }
-            if (bookEntity == null) {
-                throw new IllegalArgumentException("Book not found!");
+                ReservationDTO createDTO = reservationService.createReservation(reservDTO);
+                throw new RuntimeException("This books is already borrowed... so, we've registered for you to borrow later! Reservation ID: " + createDTO.getReservationId());
             }
 
             LoanEntity loanEntity = new LoanEntity(userEntity, bookEntity, loanDTO.getLoanDate(), loanDTO.getLoanDueDate(), loanDTO.getReturnDate(), loanDTO.getLoanStatus());
@@ -166,7 +176,14 @@ public class LoanService {
                 loanEntity.setLoanDate(loanDTO.getLoanDate() != null ? loanDTO.getLoanDate() : loanEntity.getLoanDate());
                 loanEntity.setLoanDueDate(loanDTO.getLoanDueDate() != null ? loanDTO.getLoanDueDate() : loanEntity.getLoanDueDate());
                 loanEntity.setReturnDate(loanDTO.getReturnDate() != null ? loanDTO.getReturnDate() : loanEntity.getReturnDate());
-                loanEntity.setLoanStatus(loanDTO.getLoanStatus() != null ? loanDTO.getLoanStatus() : loanEntity.getLoanStatus());
+
+                if(loanEntity.getReturnDate().equals(new java.sql.Date(System.currentTimeMillis())) || loanEntity.getReturnDate().before(loanEntity.getLoanDueDate())){
+                    loanEntity.setLoanStatus(LoanStatus.RETURNED);
+                } else if (loanEntity.getReturnDate().after(loanEntity.getLoanDueDate()) || (loanEntity.getReturnDate() == null && loanEntity.getLoanDueDate().after(new java.sql.Date(System.currentTimeMillis())))) {
+                    loanEntity.setLoanStatus(LoanStatus.LATE);
+                } else {
+                    loanEntity.setLoanStatus(loanDTO.getLoanStatus() != null ? loanDTO.getLoanStatus() : loanEntity.getLoanStatus());
+                }
     
                 loanRepository.persist(loanEntity);
 

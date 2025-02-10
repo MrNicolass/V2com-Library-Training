@@ -91,8 +91,8 @@ public class LoanController {
     public Response updateLoan(@PathParam("loanId") UUID loanId, LoanDTO loanDTO) {
         try {
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Book updated!");
-            response.put("book", loanService.updateLoan(loanId, loanDTO));
+            response.put("message", "Loan updated!");
+            response.put("loan", loanService.updateLoan(loanId, loanDTO));
             return Response.ok(response).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();

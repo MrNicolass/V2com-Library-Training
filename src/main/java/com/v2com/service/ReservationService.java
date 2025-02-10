@@ -1,6 +1,5 @@
 package com.v2com.service;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -11,7 +10,6 @@ import com.v2com.entity.BookEntity;
 import com.v2com.entity.LoanEntity;
 import com.v2com.entity.ReservationEntity;
 import com.v2com.entity.UserEntity;
-import com.v2com.entity.enums.ReservationStatus;
 import com.v2com.repository.BookRepository;
 import com.v2com.repository.LoanRepository;
 import com.v2com.repository.ReservationRepository;
@@ -52,7 +50,7 @@ public class ReservationService {
             if(loanUUID == reservationDTO.getBookId()){
                 LoanEntity loanEntity = new LoanEntity(userEntity, bookEntity);
                 loanRepository.persist(loanEntity);
-                throw new Exception("There are no loans, so, we've registered one for you! Take your book whenever you want! Loan ID = " + loanEntity.getLoanId());
+                throw new Exception("There are no loans, so, we've registered one for you! Take your book whenever you want! Loan ID: " + loanEntity.getLoanId());
             }
 
             if (userEntity == null) {

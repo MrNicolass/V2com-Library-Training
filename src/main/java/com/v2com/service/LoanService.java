@@ -18,7 +18,6 @@ import com.v2com.repository.LoanRepository;
 import com.v2com.repository.UserRepository;
 import com.v2com.repository.BookRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class LoanService {

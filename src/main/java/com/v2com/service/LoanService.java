@@ -1,16 +1,15 @@
 package com.v2com.service;
 
 import com.v2com.entity.LoanEntity;
-import com.v2com.entity.ReservationEntity;
 import com.v2com.entity.UserEntity;
 import com.v2com.entity.enums.LoanStatus;
-import com.v2com.entity.enums.ReservationStatus;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.v2com.Exceptions.UserNotFoundException;
 import com.v2com.dto.LoanDTO;
 import com.v2com.dto.ReservationDTO;
 import com.v2com.entity.BookEntity;
@@ -34,9 +33,8 @@ public class LoanService {
         this.reservationService = reservationService;
     }
 
-    public LoanDTO createLoan(LoanDTO loanDTO) {
+    public LoanDTO createLoan(LoanDTO loanDTO) throws Exception {
         try {
-            //Both user and book must exists
             UserEntity userEntity = userRepository.findById(loanDTO.getUserId());
             BookEntity bookEntity = bookRepository.findById(loanDTO.getBookId());
             UUID locateLoan = loanRepository.findLoadByBookId(loanDTO.getBookId());
@@ -48,7 +46,7 @@ public class LoanService {
             } else if (loanDTO.getLoanDate() == null) {
                 throw new RuntimeException("When was the book loaned? Fill the date!");
             } else if (userEntity == null) {
-                throw new RuntimeException("User not found!");
+                throw new UserNotFoundException();
             } else if (bookEntity == null) {
                 throw new RuntimeException("Book not found!");
             } else if (!loanDTO.getBookId().equals(locateLoan)) {
@@ -65,6 +63,8 @@ public class LoanService {
             
             loanDTO.setLoanId(loanEntity.getLoanId());
             return loanDTO;
+        } catch (UserNotFoundException user) {
+            throw user;
         } catch (Exception e) {
             throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
         }

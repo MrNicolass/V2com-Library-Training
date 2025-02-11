@@ -17,15 +17,32 @@ public class LoanRepository implements PanacheRepositoryBase<LoanEntity, UUID> {
         this.entityManager = entityManager;
     }
 
-    public UUID findLoadByBookId(UUID bookId){
-        var query = entityManager.createQuery(
-            "SELECT l.id " +
-            "FROM LoanEntity l " +
+    public UUID findLoadByBookId(UUID bookId) {
+        var query = entityManager.createNativeQuery(
+            "SELECT l.loanId " +
+            "FROM loans l " +
             "WHERE 1=1 " +
-            "AND l.book.id = :bookId", UUID.class).setParameter("bookId", bookId).getResultList();
+            "AND l.bookId = :bookId"
+        , UUID.class).setParameter("bookId", bookId).getResultList();
 
-        if(query.isEmpty()){
+        if (query.isEmpty()) {
             return bookId;
+        } else {
+            return (UUID) query.get(0);
+        }
+    }
+
+    public UUID findLoanByBookAndUserId(UUID userId, UUID bookId) {
+        var query = entityManager.createQuery(
+            "SELECT l " +
+            "FROM loans l " +
+            "WHERE 1=1 " +
+            "AND l.userId = :userId" +
+            "AND l.bookId = :bookId"
+        , UUID.class).setParameter("userId", userId).setParameter("bookId", bookId).getResultList();
+
+        if (query.isEmpty()) {
+            return userId;
         } else {
             return query.get(0);
         }

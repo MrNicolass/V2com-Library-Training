@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+cls
+
 :: Parar containers existentes
 echo Parando containers Docker...
 docker-compose down -v

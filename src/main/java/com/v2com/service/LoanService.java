@@ -9,6 +9,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.v2com.Exceptions.UserAlreadyLoanedException;
+import com.v2com.Exceptions.BookNotFoundException;
+import com.v2com.Exceptions.FilterInvalidException;
+import com.v2com.Exceptions.LoanDateIsNullException;
+import com.v2com.Exceptions.LoanNotFoundException;
+import com.v2com.Exceptions.OtherUserLoaned;
 import com.v2com.Exceptions.UserNotFoundException;
 import com.v2com.dto.LoanDTO;
 import com.v2com.dto.ReservationDTO;
@@ -38,24 +44,27 @@ public class LoanService {
             UserEntity userEntity = userRepository.findById(loanDTO.getUserId());
             BookEntity bookEntity = bookRepository.findById(loanDTO.getBookId());
             UUID locateLoan = loanRepository.findLoadByBookId(loanDTO.getBookId());
-            
+            UUID locateUserLoan = loanRepository.findLoanByUserIdAndBook(loanDTO.getUserId(), loanDTO.getBookId());
+
             if (loanDTO.getUserId() == null) {
-                throw new RuntimeException("You cannot loan a book without a user assigned!");
+                throw new UserNotFoundException("You cannot loan a book without a user assigned!");
             } else if (loanDTO.getBookId() == null) {
-                throw new RuntimeException("What book do you want to loan? Select at least one!");
+                throw new BookNotFoundException("What book do you want to loan? Select at least one!");
             } else if (loanDTO.getLoanDate() == null) {
-                throw new RuntimeException("When was the book loaned? Fill the date!");
+                throw new LoanDateIsNullException();
             } else if (userEntity == null) {
                 throw new UserNotFoundException();
             } else if (bookEntity == null) {
-                throw new RuntimeException("Book not found!");
+                throw new BookNotFoundException();
+            } else if (!loanDTO.getUserId().equals(locateUserLoan)) {
+                throw new UserAlreadyLoanedException(locateUserLoan.toString());
             } else if (!loanDTO.getBookId().equals(locateLoan)) {
                 ReservationDTO reservDTO = new ReservationDTO();
                 reservDTO.setUserId(loanDTO.getUserId());
                 reservDTO.setBookId(loanDTO.getBookId());
 
                 ReservationDTO createDTO = reservationService.createReservation(reservDTO);
-                throw new RuntimeException("This books is already borrowed... so, we've registered for you to borrow later! Reservation ID: " + createDTO.getReservationId());
+                throw new OtherUserLoaned(createDTO.getReservationId());
             }
 
             LoanEntity loanEntity = new LoanEntity(userEntity, bookEntity, loanDTO.getLoanDate(), loanDTO.getLoanDueDate(), loanDTO.getReturnDate(), loanDTO.getLoanStatus());
@@ -65,75 +74,96 @@ public class LoanService {
             return loanDTO;
         } catch (UserNotFoundException user) {
             throw user;
+        } catch (UserAlreadyLoanedException loaned) {
+            throw loaned;
+        } catch (BookNotFoundException book) {
+            throw book;
+        } catch (LoanDateIsNullException loanDate) {
+            throw loanDate;
+        } catch (OtherUserLoaned reservation) {
+            throw reservation;
         } catch (Exception e) {
             throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
         }
     }
 
-    public LoanDTO getLoanById(UUID loanId) {
+    public LoanDTO getLoanById(UUID loanId) throws Exception  {
         try {
             LoanEntity loanEntity = loanRepository.findById(loanId);
 
-            if(loanEntity == null){
-                throw new IllegalArgumentException("Loan not registered!");
+            if (loanEntity == null) {
+                throw new LoanNotFoundException(loanId.toString());
             } else {
                 return new LoanDTO(loanEntity.getLoanId(), loanEntity.getUser().getUserId(), loanEntity.getBook().getBookId(), loanEntity.getLoanDate(), loanEntity.getLoanDueDate(), loanEntity.getReturnDate(), loanEntity.getLoanStatus());
             }
 
-        } catch (Exception e){
+        } catch (LoanNotFoundException notFound){
+            throw notFound;
+        } catch (Exception e) {
             throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
         }
     } 
 
-    public List<LoanEntity> getAllLoans() {
+    public List<LoanEntity> getAllLoans() throws Exception {
         try {
-            if(loanRepository.findAll().list().isEmpty()) {
-                throw new IllegalArgumentException("No loans found!");
+            if (loanRepository.findAll().list().isEmpty()) {
+                throw new LoanNotFoundException();
             } else {
                 return loanRepository.findAll().list();
             }
+        } catch (LoanNotFoundException notFound) {
+            throw notFound;
         } catch (Exception e) {
             throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
         }
     }
 
-    public List<LoanEntity> getLoansByFilters(Map<String, String> filters){
-        List<LoanEntity> loans = this.getAllLoans();
-
-        if (loans.isEmpty()) {
-            throw new IllegalArgumentException("No loans found!");
-        }
-
-        for (String key : filters.keySet()) {
-            if (!key.equals("user") && !key.equals("book") && !key.equals("loanDate" ) && !key.equals("loanDueDate") && !key.equals("returnDate") && !key.equals("loanStatus")) {
-                throw new IllegalArgumentException("One or more filters are invalid!");
+    public List<LoanEntity> getLoansByFilters(Map<String, String> filters) throws Exception{
+        try {
+            List<LoanEntity> loans = this.getAllLoans();
+    
+            if (loans.isEmpty()) {
+                throw new LoanNotFoundException();
             }
-        }
-
-        loans = filters.entrySet().stream().reduce(loans, (filteredloans, filter) -> filteredloans.stream().filter(loan -> {
-                switch(filter.getKey()) {
-                    case "user":
-                        return loan.getUser().getUserId().toString().contains(filter.getValue());
-                    case "book":
-                        return loan.getBook().getBookId().toString().contains(filter.getValue());
-                    case "loanDate":
-                        return loan.getLoanDate().toString().contains(filter.getValue());
-                    case "loanDueDate":
-                        return loan.getLoanDueDate().toString().contains(filter.getValue());
-                    case "returnDate":
-                        return loan.getReturnDate().toString().contains(filter.getValue());
-                    case "loanStatus":
-                        return loan.getLoanStatus().toString().toUpperCase().contains(filter.getValue());
-                    default:
-                        return true;
+    
+            for (String key : filters.keySet()) {
+                if (!key.equals("user") && !key.equals("book") && !key.equals("loanDate" ) && !key.equals("loanDueDate") && !key.equals("returnDate") && !key.equals("loanStatus")) {
+                    throw new FilterInvalidException(key);
                 }
-            //Collect the filtered loans into a list and combine the results of the reduction
-            }).collect(Collectors.toList()), (u1, u2) -> u1);
+            }
+    
+            loans = filters.entrySet().stream().reduce(loans, (filteredloans, filter) -> filteredloans.stream().filter(loan -> {
+                    switch(filter.getKey()) {
+                        case "user":
+                            return loan.getUser().getUserId().toString().contains(filter.getValue());
+                        case "book":
+                            return loan.getBook().getBookId().toString().contains(filter.getValue());
+                        case "loanDate":
+                            return loan.getLoanDate().toString().contains(filter.getValue());
+                        case "loanDueDate":
+                            return loan.getLoanDueDate().toString().contains(filter.getValue());
+                        case "returnDate":
+                            return loan.getReturnDate().toString().contains(filter.getValue());
+                        case "loanStatus":
+                            return loan.getLoanStatus().toString().toUpperCase().contains(filter.getValue());
+                        default:
+                            return true;
+                    }
+                //Collect the filtered loans into a list and combine the results of the reduction
+                }).collect(Collectors.toList()), (u1, u2) -> u1);
+    
+            return loans;
 
-        return loans;
+        } catch (LoanNotFoundException notFound) {
+            throw notFound;
+        } catch (FilterInvalidException invalid) {
+            throw invalid;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
+        }
     }
 
-    public LoanDTO deleteLoan(UUID loanId) {
+    public LoanDTO deleteLoan(UUID loanId) throws Exception {
         LoanDTO loan = this.getLoanById(loanId);
 
         if(loan != null) {

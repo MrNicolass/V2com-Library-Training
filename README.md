@@ -1,85 +1,225 @@
-# library
+# V2com Library Training
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+This project was proposed by <a href="https://v2com.com/">V2com</a> to teach college scholarship students how to use Quarkus, Docker, and the MVC pattern. Through this training, it's possible to develop practical skills in building Java Quarkus mainly.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## Project Structure
 
-## Running the application in dev mode
+<details>
+<summary>How it was created?</summary>
+It was created using the MVC model, that is a pattern that separates an application's logic into three parts: model, the view and the controller. We can see the base structure below:
 
-You can run your application in dev mode that enables live coding using:
-
-```shell script
-./mvnw quarkus:dev
+```
+V2com-Library-Training-api/
+│── src/
+│   ├── main/
+│   │   ├── java/com/example/V2com-Library-Training/
+│   │   │   ├── entity/
+│   │   │   │   ├── Book.java
+│   │   │   │   ├── User.java
+│   │   │   │   ├── Loan.java
+│   │   │   │   ├── Reservation.java
+│   │   │   │   ├── enums/
+│   │   │   │   │   ├── LoanStatus.java
+│   │   │   │   │   ├── ReservationStatus.java
+│   │   │   │   │   ├── UserRole.java
+│   │   │   ├── repository/
+│   │   │   │   ├── BookRepository.java
+│   │   │   │   ├── UserRepository.java
+│   │   │   │   ├── LoanRepository.java
+│   │   │   │   ├── ReservationRepository.java
+│   │   │   ├── service/
+│   │   │   │   ├── BookService.java
+│   │   │   │   ├── UserService.java
+│   │   │   │   ├── LoanService.java
+│   │   │   │   ├── ReservationService.java
+│   │   │   ├── controller/
+│   │   │   │   ├── BookController.java
+│   │   │   │   ├── UserController.java
+│   │   │   │   ├── LoanController.java
+│   │   │   │   ├── ReservationController.java
+│   │   │   ├── dto/
+│   │   │   │   ├── BookDTO.java
+│   │   │   │   ├── UserDTO.java
+│   │   │   │   ├── LoanDTO.java
+│   │   │   │   ├── ReservationDTO.java
+│   ├── resources/
+│   │   ├── application.properties
+│── pom.xml
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+</details>
 
-## Packaging and running the application
+### Entities Description
 
-The application can be packaged using:
+> 💡 Below, some entities receive other entities in there structure, like `Loan`, tha receive `User` and `book`. In the database they were recorded as UUID's, but in code/ORM on moust routes is sent a DTO with UUID's and recorded by using entities/objects.
 
-```shell script
-./mvnw package
+#### Book
+- **Attributes:**
+    - `id` (UUID): Unique identifier for the book.
+    - `title` (String): Title of the book.
+    - `author` (String): Author of the book.
+    - `isbn` (String): ISBN number of the book.
+    - `publishedDate` (LocalDate): Date when the book was published.
+    - `status` (String): Current status of the book (e.g., available, borrowed).
+
+- **Relationships:**
+    - One-to-Many with `Loan`: A book can have multiple loans.
+    - One-to-Many with `Reservation`: A book can have multiple reservations.
+
+#### User
+- **Attributes:**
+    - `id` (UUID): Unique identifier for the user.
+    - `name` (String): Name of the user.
+    - `email` (String): Email address of the user.
+    - `password` (String): Password for the user's account.
+    - `role` (UserRole): Role of the user (e.g., admin, member).
+
+- **Relationships:**
+    - One-to-Many with `Loan`: A user can have multiple loans.
+    - One-to-Many with `Reservation`: A user can have multiple reservations.
+
+#### Loan
+- **Attributes:**
+    - `id` (UUID): Unique identifier for the loan.
+    - `bookId` (UUID): Identifier of the borrowed book.
+    - `userId` (UUID): Identifier of the user who borrowed the book.
+    - `loanDate` (LocalDate): Date when the loan was made.
+    - `returnDate` (LocalDate): Date when the book is expected to be returned.
+    - `status` (LoanStatus): Current status of the loan (e.g., active, returned).
+
+- **Relationships:**
+    - Many-to-One with `Book`: A loan is associated with one book.
+    - Many-to-One with `User`: A loan is associated with one user.
+
+#### Reservation
+- **Attributes:**
+    - `id` (UUID): Unique identifier for the reservation.
+    - `bookId` (UUID): Identifier of the reserved book.
+    - `userId` (UUID): Identifier of the user who reserved the book.
+    - `reservationDate` (LocalDate): Date when the reservation was made.
+    - `status` (ReservationStatus): Current status of the reservation (e.g., active, fulfilled).
+
+- **Relationships:**
+    - Many-to-One with `Book`: A reservation is associated with one book.
+    - Many-to-One with `User`: A reservation is associated with one user.
+
+<h3>
+<details>
+<summary>Example image of the Diagram</summary>
+
+![Project Diagram](diagram.png)
+
+</details>
+</h3>
+
+## How it works
+
+### Users
+Users can register, update their information, and delete their accounts. They can also borrow and reserve books.
+
+- **Routes:**
+    - `POST /users` - Register a new user;
+    - `GET /users/{id}` - Get user details by searching by filter;
+    - `GET /users` - Get users by filter on UriInfo (`endpoint?filterName=filterValue`);
+    - `PATCH /users/{id}` - Update user information;
+    - `DELETE /users/{id}` - Delete a user.
+
+### Books
+Books can be added, updated, and deleted by the library staff. Users can view book details.
+
+- **Routes:**
+    - `POST /books` - Add a new book;
+    - `GET /books/{id}` - Get book details;
+    - `GET /books` - Get books by filter on UriInfo (`endpoint?filterName=filterValue`);
+    - `PATCH /books/{id}` - Update book information;
+    - `DELETE /books/{id}` - Delete a book.
+
+### Loans
+Users can borrow books, and the system tracks the loan status.
+
+- **Routes:**
+    - `POST /loans` - Create a new loan;
+        - If the book is already borrowed, automatically creates a new reservation;
+    - `GET /loans/{id}` - Get loan details;
+    - `GET /loans` - Get loan by filter on UriInfo (`endpoint?filterName=filterValue`);
+    - `PATCH /loans/{id}` - Update loan information;
+    - `DELETE /loans/{id}` - Delete a loan.
+
+### Reservations
+Users can reserve books, and the system tracks the reservation status.
+
+- **Routes:**
+    - `POST /reservations` - Create a new reservation;
+        - If there are no Loans for the select book, it's created automatically a new Loan;
+    - `GET /reservations/{id}` - Get reservation details;
+    - `GET /reservations` - Get reservation by filters on UriInfo (`endpoint?filterName=filterValue`);
+    - `PATCH /reservations/{id}` - Update reservation information;
+    - `DELETE /reservations/{id}` - Delete a reservation.
+
+## Libraries Used
+
+- Quarkus;
+- JUnit;
+- RESTEasy;
+- Hibernate ORM;
+- Docker.
+
+## `.env` Configuration
+
+Create a `.env` file in the root of the project with the following variables:
+
+```
+POSTGRES_DB=library
+POSTGRES_USER=your_own_db_user
+POSTGRES_PASSWORD=your_own_db_password
+QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://db:5432/library
+QUARKUS_DATASOURCE_USERNAME=your_own_db_user
+QUARKUS_DATASOURCE_PASSWORD=your_own_db_user
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+## Running the Program
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+On both ways to start the program, execute commands in root folder:
 
-If you want to build an _über-jar_, execute the following command:
+### With Docker
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
+1. Create the project .jar:
+    ```sh
+    ./mvnw package -DskipTests
+    ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+2. Build the Docker image:
+    ```sh
+    docker build -f src/main/docker/Dockerfile.jvm -t quarkus/library-jvm .
+    ```
 
-## Creating a native executable
+3. Change the tag of container:
+    ```sh
+    docker tag quarkus/library-jvm:latest quarkus/library-jvm:1.0.0-SNAPSHOT
+    ```
 
-You can create a native executable using:
+4. Remove old container:
+    ```sh
+    docker rmi quarkus/library-jvm:latest
+    ```
 
-```shell script
-./mvnw package -Dnative
-```
+5. Run docker compose:
+    ```sh
+    docker-compose up
+    ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+### With Maven/Quarkus from the Terminal
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
+1. If you've created a `.env` file before, renamit or exclude to execute program in dev mode.
 
-You can then execute your native executable with: `./target/library-1.0.0-SNAPSHOT-runner`
+2. Create the project .jar:
+    ```sh
+    ./mvnw package -DskipTests
+    ```
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+3. Run the project:
+    ```sh
+    ./mvnw quarkus:dev
+    ```
 
-## Related Guides
-
-- REST resources for Hibernate ORM with Panache ([guide](https://quarkus.io/guides/rest-data-panache)): Generate Jakarta REST resources for your Hibernate Panache entities and repositories
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplify your persistence code for Hibernate ORM via the active record or the repository pattern
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
-
-## Provided Code
-
-### Hibernate ORM
-
-Create your first JPA entity
-
-[Related guide section...](https://quarkus.io/guides/hibernate-orm)
-
-[Related Hibernate with Panache section...](https://quarkus.io/guides/hibernate-orm-panache)
-
-
-### REST Data with Panache
-
-Generating Jakarta REST resources with Panache
-
-[Related guide section...](https://quarkus.io/guides/rest-data-panache)
-
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+Done! The project will be running at `http://localhost:8080`.

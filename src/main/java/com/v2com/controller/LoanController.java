@@ -5,6 +5,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.v2com.Exceptions.UserAlreadyLoanedException;
+import com.v2com.Exceptions.BookNotFoundException;
+import com.v2com.Exceptions.FilterInvalidException;
+import com.v2com.Exceptions.LoanDateIsNullException;
+import com.v2com.Exceptions.LoanNotFoundException;
+import com.v2com.Exceptions.OtherUserLoaned;
+import com.v2com.Exceptions.UserNotFoundException;
 import com.v2com.dto.LoanDTO;
 import com.v2com.service.LoanService;
 
@@ -40,7 +47,15 @@ public class LoanController {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Loan registered!");
             response.put("loan", loanService.createLoan(loan));
-            return Response.ok(response).build();
+            return Response.status(201).entity(response).build();
+        } catch (UserNotFoundException | BookNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
+        } catch (UserAlreadyLoanedException loaned) {
+            return Response.status(409).entity(loaned.getMessage()).build();
+        } catch (LoanDateIsNullException loanDate) {
+            return Response.status(406).entity(loanDate.getMessage()).build();
+        } catch (OtherUserLoaned reservation) {
+            return Response.status(201).entity(reservation.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -55,6 +70,8 @@ public class LoanController {
             response.put("message", "Loan founded!");
             response.put("loan", loanService.getLoanById(loanId));
             return Response.ok(response).build();
+        } catch (LoanNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -66,6 +83,11 @@ public class LoanController {
         try {
             Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
             return Response.ok(loanService.getLoansByFilters(filters)).build();
+            
+        } catch (LoanNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
+        } catch (FilterInvalidException invalid) {
+            return Response.status(406).entity(invalid.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -79,7 +101,9 @@ public class LoanController {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Loan deleted!");
             response.put("loan", loanService.deleteLoan(loanId));
-            return Response.ok(response).build();
+            return Response.status(410).entity(response).build();
+        } catch (LoanNotFoundException | UserNotFoundException | BookNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -91,11 +115,14 @@ public class LoanController {
     public Response updateLoan(@PathParam("loanId") UUID loanId, LoanDTO loanDTO) {
         try {
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Book updated!");
-            response.put("book", loanService.updateLoan(loanId, loanDTO));
+            response.put("message", "Loan updated!");
+            response.put("loan", loanService.updateLoan(loanId, loanDTO));
             return Response.ok(response).build();
+        } catch (LoanNotFoundException | UserNotFoundException | BookNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
     }
+
 }

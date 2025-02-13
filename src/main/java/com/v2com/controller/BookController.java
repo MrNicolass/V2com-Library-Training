@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.v2com.Exceptions.ArgumentNullException;
+import com.v2com.Exceptions.BookNotFoundException;
+import com.v2com.Exceptions.FilterInvalidException;
 import com.v2com.dto.bookDTO;
 import com.v2com.service.BookService;
 
@@ -37,7 +40,13 @@ public class BookController {
     @Transactional
     public Response createBook(bookDTO bookEntity) {
         try {
-            return Response.ok(bookService.createBook(bookEntity)).build();
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Book created!");
+            response.put("book", bookService.createBook(bookEntity));
+            return Response.status(201).entity(response).build();
+
+        } catch (ArgumentNullException argumentRequired) {
+            return Response.status(406).entity(argumentRequired.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -48,7 +57,13 @@ public class BookController {
     @Path("/{bookId}")
     public Response getBookById(@PathParam("bookId") UUID bookId) {
         try {
-            return Response.ok(bookService.getBookById(bookId)).build();
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Book found!");
+            response.put("book", bookService.getBookById(bookId));
+            return Response.ok(response).build();
+
+        } catch (BookNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -60,6 +75,11 @@ public class BookController {
         try {
             Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
             return Response.ok(bookService.getBooksByFilters(filters)).build();
+
+        } catch (BookNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
+        } catch (FilterInvalidException invalid) {
+            return Response.status(406).entity(invalid.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -73,7 +93,10 @@ public class BookController {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Book deleted!");
             response.put("book", bookService.deleteBook(bookId));
-            return Response.ok(response).build();
+            return Response.status(410).entity(response).build();
+
+        } catch (BookNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -88,8 +111,12 @@ public class BookController {
             response.put("message", "Book updated!");
             response.put("book", bookService.updateBook(bookId, bookDTO));
             return Response.ok(response).build();
+
+        } catch (BookNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
     }
+
 }

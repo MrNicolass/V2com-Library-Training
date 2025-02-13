@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.v2com.Exceptions.ArgumentNullException;
+import com.v2com.Exceptions.BookNotFoundException;
+import com.v2com.Exceptions.FilterInvalidException;
 import com.v2com.dto.bookDTO;
 import com.v2com.entity.BookEntity;
 import com.v2com.repository.BookRepository;
@@ -20,107 +23,125 @@ public class BookService {
         this.bookRepository = bookRepository;
     }
 
-    public BookEntity createBook(bookDTO bookDTO) {
+    public BookEntity createBook(bookDTO bookDTO) throws Exception {
         try {
             if (bookDTO.getTitle() == null) {
-                throw new IllegalArgumentException("Title is required!");
+                throw new ArgumentNullException("Title");
             }
             else if (bookDTO.getAuthor() == null) {
-                throw new IllegalArgumentException("Author is required!");
+                throw new ArgumentNullException("Author");
             } else if (bookDTO.getIsAvailable() == null) {
-                throw new IllegalArgumentException("Availability is required!");
+                throw new ArgumentNullException("Availability");
             }
             
             BookEntity bookEntity = new BookEntity(bookDTO.getTitle(), bookDTO.getAuthor(), bookDTO.getIsbn(), bookDTO.getPublicationDate(), bookDTO.getIsAvailable());
 
             bookRepository.persist(bookEntity);
             return bookEntity;
+
+        } catch (ArgumentNullException arg) {
+            throw arg;
         } catch (Exception e) {
             throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
         }
     }
     
-    public List<BookEntity> getAllBooks() {
+    public List<BookEntity> getAllBooks() throws Exception {
         try {
             if(bookRepository.findAll().list().isEmpty()) {
-                throw new IllegalArgumentException("No books found!");
+                throw new BookNotFoundException();
             } else {
                 return bookRepository.findAll().list();
             }
+        } catch (BookNotFoundException notFound) {
+            throw notFound;
         } catch (Exception e) {
             throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
         }
     }
 
-    public bookDTO getBookById(UUID bookId) {
+    public bookDTO getBookById(UUID bookId) throws Exception {
         try {
             BookEntity bookEntity = bookRepository.findById(bookId);
             if(bookEntity != null) {
                 return new bookDTO(bookEntity.getBookId(), bookEntity.getTitle(), bookEntity.getAuthor(), bookEntity.getIsbn(), bookEntity.getPublicationDate(), bookEntity.getIsAvailable());
             } else {
-                throw new IllegalArgumentException("Book not found!");
+                throw new BookNotFoundException();
             }
+        } catch (BookNotFoundException notFound) {
+            throw notFound;
         } catch (Exception e) {
             throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
         }
     }
 
-    public List<BookEntity> getBooksByFilters(Map<String, String> filters) {
-        List<BookEntity> books = this.getAllBooks();
-
-        if (books.isEmpty()) {
-            throw new IllegalArgumentException("No books found!");
-        }
-
-        for (String key : filters.keySet()) {
-            if (!key.equals("title") && !key.equals("author") && !key.equals("isbn" ) && !key.equals("isAvailable") && !key.equals("publicationDate")) {
-                throw new IllegalArgumentException("One or more filters are invalid!");
+    public List<BookEntity> getBooksByFilters(Map<String, String> filters) throws Exception {
+        try {
+            List<BookEntity> books = this.getAllBooks();
+    
+            if (books.isEmpty()) {
+                throw new BookNotFoundException();
             }
-        }
-
-        books = filters.entrySet().stream().reduce(books, (filteredbooks, filter) -> filteredbooks.stream().filter(book -> {
-                switch(filter.getKey()) {
-                    case "title":
-                        return book.getTitle().contains(filter.getValue());
-                    case "author":
-                        return book.getAuthor().contains(filter.getValue());
-                    case "isbn":
-                        return book.getIsbn().toString().toUpperCase().contains(filter.getValue());
-                    case "publicationDate":
-                        return book.getPublicationDate().toString().toUpperCase().contains(filter.getValue());
-                    case "isAvailable":
-                        return Boolean.toString(book.getIsAvailable()).equalsIgnoreCase(filter.getValue());
-                    default:
-                        return true;
+    
+            for (String key : filters.keySet()) {
+                if (!key.equals("title") && !key.equals("author") && !key.equals("isbn" ) && !key.equals("isAvailable") && !key.equals("publicationDate")) {
+                    throw new FilterInvalidException(key);
                 }
-            //Collect the filtered books into a list and combine the results of the reduction
-            }).collect(Collectors.toList()), (u1, u2) -> u1);
-
-        return books;
+            }
+    
+            books = filters.entrySet().stream().reduce(books, (filteredbooks, filter) -> filteredbooks.stream().filter(book -> {
+                    switch(filter.getKey()) {
+                        case "title":
+                            return book.getTitle().contains(filter.getValue());
+                        case "author":
+                            return book.getAuthor().contains(filter.getValue());
+                        case "isbn":
+                            return book.getIsbn().toString().toUpperCase().contains(filter.getValue());
+                        case "publicationDate":
+                            return book.getPublicationDate().toString().toUpperCase().contains(filter.getValue());
+                        case "isAvailable":
+                            return Boolean.toString(book.getIsAvailable()).equalsIgnoreCase(filter.getValue());
+                        default:
+                            return true;
+                    }
+                //Collect the filtered books into a list and combine the results of the reduction
+                }).collect(Collectors.toList()), (u1, u2) -> u1);
+    
+            return books;
+            
+        } catch (BookNotFoundException notFound) {
+            throw notFound;
+        } catch (FilterInvalidException invalid) {
+            throw invalid;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
+        }
     }
 
-    public bookDTO deleteBook(UUID bookId) {
-        bookDTO book = this.getBookById(bookId);
+    public bookDTO deleteBook(UUID bookId) throws Exception {
+        try {
+            bookDTO book = this.getBookById(bookId);
 
-        if(book != null) {
-            try {
+            if(book != null) {
                 BookEntity bookEntity = new BookEntity(book.getTitle(), book.getAuthor(), book.getIsbn(), book.getPublicationDate(), book.getIsAvailable());
                 bookEntity.setBookId(book.getBookId());
                 bookRepository.delete(bookEntity);
                 return book;
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
+            } else {
+                throw new BookNotFoundException(bookId);
             }
-        } else {
-            return book;
+        } catch (BookNotFoundException notFound) {
+            throw notFound;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
         }
     }
 
-    public bookDTO updateBook(UUID bookId, bookDTO bookDTO) {
+    public bookDTO updateBook(UUID bookId, bookDTO bookDTO) throws Exception {
+        try {
         BookEntity bookEntity = bookRepository.findById(bookId);
 
         if(bookEntity != null){
-            try {
                 bookEntity.setTitle(bookDTO.getTitle() != null ? bookDTO.getTitle() : bookEntity.getTitle());
                 bookEntity.setAuthor(bookDTO.getAuthor() != null ? bookDTO.getAuthor() : bookEntity.getAuthor());
                 bookEntity.setIsbn(bookDTO.getIsbn() != null ? bookDTO.getIsbn() : bookEntity.getIsbn());
@@ -131,11 +152,14 @@ public class BookService {
 
                 bookDTO.setBookId(bookId);
                 return bookDTO;
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
+            } else {
+                throw new BookNotFoundException(bookId);
             }
-        } else {
-            return bookDTO;
+
+        } catch (BookNotFoundException notFound) {
+            throw notFound;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
         }
     }
 }

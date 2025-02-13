@@ -5,6 +5,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.v2com.Exceptions.BookNotFoundException;
+import com.v2com.Exceptions.FilterInvalidException;
+import com.v2com.Exceptions.LoanNotFoundException;
+import com.v2com.Exceptions.NoLoansFoundException;
+import com.v2com.Exceptions.ReservationDateIsNullException;
+import com.v2com.Exceptions.ReservationNotFoundException;
+import com.v2com.Exceptions.UserAlreadyReservedException;
+import com.v2com.Exceptions.UserNotFoundException;
 import com.v2com.dto.ReservationDTO;
 import com.v2com.service.ReservationService;
 
@@ -40,9 +48,15 @@ public class ReservationController {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Reservation registered!");
             response.put("reservation", reservationService.createReservation(reservation));
-            return Response.ok(response).build();
-        } catch (IllegalArgumentException il) {
-            return Response.serverError().entity(il.getMessage()).build();
+            return Response.status(201).entity(response).build();
+        } catch (UserNotFoundException | BookNotFoundException | ReservationNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
+        } catch (ReservationDateIsNullException reservationDate) {
+            return Response.status(409).entity(reservationDate.getMessage()).build();
+        } catch (NoLoansFoundException LoanNotFound) {
+            return Response.status(201).entity(LoanNotFound.getMessage()).build();
+        } catch (UserAlreadyReservedException alreadyReserv) {
+            return Response.status(403).entity(alreadyReserv.getMessage()).build();
         } catch (Exception e) {
             return Response.ok().entity(e.getMessage()).build();
         }
@@ -57,6 +71,8 @@ public class ReservationController {
             response.put("message", "Reservation founded!");
             response.put("reservation", reservationService.getReservationById(reservationId));
             return Response.ok(response).build();
+        } catch (ReservationNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -68,6 +84,10 @@ public class ReservationController {
         try {
             Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
             return Response.ok(reservationService.getReservationsByFilters(filters)).build();
+        } catch (ReservationNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
+        } catch (FilterInvalidException invalid) {
+            return Response.status(406).entity(invalid.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -81,7 +101,9 @@ public class ReservationController {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "reservation deleted!");
             response.put("reservation", reservationService.deleteReservation(reservationId));
-            return Response.ok(response).build();
+            return Response.status(410).entity(response).build();
+        } catch (ReservationNotFoundException | UserNotFoundException | BookNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -96,6 +118,8 @@ public class ReservationController {
             response.put("message", "Reservation updated!");
             response.put("reservation", reservationService.updateReservation(reservationId, reservationDTO));
             return Response.ok(response).build();
+        } catch (LoanNotFoundException | UserNotFoundException | BookNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }

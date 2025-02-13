@@ -83,6 +83,7 @@ public class LoanController {
         try {
             Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
             return Response.ok(loanService.getLoansByFilters(filters)).build();
+            
         } catch (LoanNotFoundException notFound) {
             return Response.status(404).entity(notFound.getMessage()).build();
         } catch (FilterInvalidException invalid) {
@@ -101,7 +102,7 @@ public class LoanController {
             response.put("message", "Loan deleted!");
             response.put("loan", loanService.deleteLoan(loanId));
             return Response.status(410).entity(response).build();
-        } catch (LoanNotFoundException notFound) {
+        } catch (LoanNotFoundException | UserNotFoundException | BookNotFoundException notFound) {
             return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
@@ -117,6 +118,8 @@ public class LoanController {
             response.put("message", "Loan updated!");
             response.put("loan", loanService.updateLoan(loanId, loanDTO));
             return Response.ok(response).build();
+        } catch (LoanNotFoundException | UserNotFoundException | BookNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }

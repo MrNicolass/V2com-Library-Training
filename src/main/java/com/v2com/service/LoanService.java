@@ -43,8 +43,8 @@ public class LoanService {
         try {
             UserEntity userEntity = userRepository.findById(loanDTO.getUserId());
             BookEntity bookEntity = bookRepository.findById(loanDTO.getBookId());
-            UUID locateLoan = loanRepository.findLoadByBookId(loanDTO.getBookId());
-            UUID locateUserLoan = loanRepository.findLoanByUserIdAndBook(loanDTO.getUserId(), loanDTO.getBookId());
+            UUID locateLoan = loanRepository.findLoanByBookId(loanDTO.getBookId());
+            UUID locateUserLoan = loanRepository.findLoanByUserAndBookId(loanDTO.getUserId(), loanDTO.getBookId());
 
             if (loanDTO.getUserId() == null) {
                 throw new UserNotFoundException("You cannot loan a book without a user assigned!");
@@ -164,65 +164,81 @@ public class LoanService {
     }
 
     public LoanDTO deleteLoan(UUID loanId) throws Exception {
-        LoanDTO loan = this.getLoanById(loanId);
+        try {
+            LoanDTO loan = this.getLoanById(loanId);
 
-        if(loan != null) {
-            try {
+            if(loan != null) {
                 UserEntity userEntity = userRepository.findById(loan.getUserId());
                 BookEntity bookEntity = bookRepository.findById(loan.getBookId());
 
-                LoanEntity loanEntity = new LoanEntity(userEntity, bookEntity, loan.getLoanDate(), loan.getLoanDueDate(), loan.getReturnDate(), loan.getLoanStatus());
+                if (userEntity == null) {
+                    throw new UserNotFoundException();
+                } else if (bookEntity == null) {
+                    throw new BookNotFoundException();
+                }
+
+                LoanEntity loanEntity = new LoanEntity(userEntity, bookEntity);
                 loanEntity.setLoanId(loanId);
 
                 loanRepository.delete(loanEntity);
 
                 return loan;
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
+            } else {
+                throw new LoanNotFoundException(loanId.toString());
             }
-        } else {
-            return loan;
+            
+        } catch (LoanNotFoundException notFound) {
+            throw notFound;
+        } catch (UserNotFoundException user) {
+            throw user;
+        } catch (BookNotFoundException book) {
+            throw book;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
         }
     }
-
-    public LoanDTO updateLoan(UUID loanId, LoanDTO loanDTO) {
-        LoanEntity loanEntity = loanRepository.findById(loanId);
-        
-        BookEntity bookEntityChange = bookRepository.findById(loanDTO.getBookId());
-        if(bookEntityChange == null){
-            throw new IllegalArgumentException("Book does not exists!");
-        }
-
-        UserEntity userEntityChange = userRepository.findById(loanDTO.getUserId());
-        if(userEntityChange == null){
-            throw new IllegalArgumentException("User does not exists!");
-        }
-
-        if(loanEntity != null){
-            try {
+    
+    public LoanDTO updateLoan(UUID loanId, LoanDTO loanDTO) throws Exception {
+        try {
+            LoanEntity loanEntity = loanRepository.findById(loanId);
+            BookEntity bookEntityChange = bookRepository.findById(loanDTO.getBookId());
+            UserEntity userEntityChange = userRepository.findById(loanDTO.getUserId());
+            
+            if (userEntityChange == null) {
+                throw new UserNotFoundException();
+            } else if (bookEntityChange == null) {
+                throw new BookNotFoundException();
+            } else if (loanEntity != null) {
                 loanEntity.setUser(userEntityChange != null ? userEntityChange : loanEntity.getUser());
                 loanEntity.setBook(bookEntityChange != null ? bookEntityChange : loanEntity.getBook());
                 loanEntity.setLoanDate(loanDTO.getLoanDate() != null ? loanDTO.getLoanDate() : loanEntity.getLoanDate());
                 loanEntity.setLoanDueDate(loanDTO.getLoanDueDate() != null ? loanDTO.getLoanDueDate() : loanEntity.getLoanDueDate());
                 loanEntity.setReturnDate(loanDTO.getReturnDate() != null ? loanDTO.getReturnDate() : loanEntity.getReturnDate());
 
-                if(loanEntity.getReturnDate().equals(new java.sql.Date(System.currentTimeMillis())) || loanEntity.getReturnDate().before(loanEntity.getLoanDueDate())){
+                if (loanEntity.getReturnDate().equals(new java.sql.Date(System.currentTimeMillis())) || loanEntity.getReturnDate().before(loanEntity.getLoanDueDate())) {
                     loanEntity.setLoanStatus(LoanStatus.RETURNED);
                 } else if (loanEntity.getReturnDate().after(loanEntity.getLoanDueDate()) || (loanEntity.getReturnDate() == null && loanEntity.getLoanDueDate().after(new java.sql.Date(System.currentTimeMillis())))) {
                     loanEntity.setLoanStatus(LoanStatus.LATE);
                 } else {
                     loanEntity.setLoanStatus(loanDTO.getLoanStatus() != null ? loanDTO.getLoanStatus() : loanEntity.getLoanStatus());
                 }
-    
+
                 loanRepository.persist(loanEntity);
 
                 loanDTO.setLoanId(loanId);
                 return loanDTO;
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
+            } else {
+                throw new LoanNotFoundException(loanId.toString());
             }
-        } else {
-            return loanDTO;
+
+        } catch (UserNotFoundException user) {
+            throw user;
+        } catch (BookNotFoundException book) {
+            throw book;
+        } catch (LoanNotFoundException notFound) {
+            throw notFound;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Something went wrong...: " + e.getMessage());
         }
     }
 }

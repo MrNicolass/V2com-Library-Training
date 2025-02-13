@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.v2com.Exceptions.ArgumentNullException;
+import com.v2com.Exceptions.FilterInvalidException;
+import com.v2com.Exceptions.UserNotFoundException;
 import com.v2com.dto.userDTO;
 import com.v2com.service.UserService;
 
@@ -37,7 +40,13 @@ public class UserController {
     @Transactional
     public Response createUser(userDTO userEntity) {
         try {
-            return Response.ok(userService.createUser(userEntity)).build();
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "User created!");
+            response.put("user", userService.createUser(userEntity));
+            return Response.status(201).entity(response).build();
+            
+        } catch (ArgumentNullException argumentRequired) {
+            return Response.status(406).entity(argumentRequired.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -48,7 +57,13 @@ public class UserController {
     @Path("/{userId}")
     public Response getUserById(@PathParam("userId") UUID userId) {
         try {
-            return Response.ok(userService.getUserById(userId)).build();
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "User found!");
+            response.put("user", userService.getUserById(userId));
+            return Response.ok().entity(response).build();
+            
+        } catch (UserNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -60,6 +75,11 @@ public class UserController {
         try {
             Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
             return Response.ok(userService.getUserByFilters(filters)).build();
+
+        } catch (UserNotFoundException notFound) {
+            return Response.status(404).entity(notFound.getMessage()).build();
+        } catch (FilterInvalidException invalid) {
+            return Response.status(406).entity(invalid.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -73,7 +93,10 @@ public class UserController {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "User deleted!");
             response.put("user", userService.deleteUser(userId));
-            return Response.ok(response).build();
+            return Response.status(410).entity(response).build();
+
+        } catch (UserNotFoundException notFound) {
+            return Response.status(404).entity(notFound).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -84,7 +107,13 @@ public class UserController {
     @Path("/{userId}")
     public Response updateUser(@PathParam("userId") UUID userId, userDTO userDTO) {
         try {
-            return Response.ok(userService.updateUser(userId, userDTO)).build();
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "User updated!");
+            response.put("user", userService.updateUser(userId, userDTO));
+            return Response.ok(response).build();
+            
+        } catch (UserNotFoundException notFound) {
+            return Response.status(404).entity(notFound).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }

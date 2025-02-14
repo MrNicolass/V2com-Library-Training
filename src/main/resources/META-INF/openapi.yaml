@@ -1,0 +1,424 @@
+openapi: 3.0.0
+
+info:
+  title: V2com Library Training API
+  description: "API for library management, including users, books, loans, and reservations."
+  version: 1.0.0
+
+servers:
+- url: /api/v1
+
+paths:
+  /users:
+    get:
+      summary: Get Users By Filter
+      tags:
+      - User Controller
+      parameters:
+        - in: query
+          name: Name
+          description: Name of the user beeing searched.
+          schema:
+            type: string
+        - in: query
+          name: Email
+          description: E-mail of the user beeing searched.
+          schema:
+            type: string
+            format: email
+        - in: query
+          name: Role
+          description: Role of the user beeing searched.
+          schema:
+            type: string
+            enum: ["USER", "ADMIN"]
+
+      responses:
+        "200":
+          description: OK!
+        "404":
+          description: User not found!
+        "406":
+          description: One or more filters are invalid!
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/userDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Create User
+      tags:
+      - User Controller
+  /users/{userId}:
+    patch:
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/userDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Update User
+      tags:
+      - User Controller
+    get:
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Get User By Id
+      tags:
+      - User Controller
+    delete:
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Delete User
+      tags:
+      - User Controller
+  /books:
+    get:
+      responses:
+        "200":
+          description: OK
+      summary: Get Books By Filter
+      tags:
+      - Book Controller
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/bookDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Create Book
+      tags:
+      - Book Controller
+  /books/{bookId}:
+    patch:
+      parameters:
+      - name: bookId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/bookDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Update Book
+      tags:
+      - Book Controller
+    get:
+      parameters:
+      - name: bookId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Get Book By Id
+      tags:
+      - Book Controller
+    delete:
+      parameters:
+      - name: bookId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Delete Book
+      tags:
+      - Book Controller
+  /loans:
+    get:
+      responses:
+        "200":
+          description: OK
+      summary: Get Loans By Filters
+      tags:
+      - Loan Controller
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Create Loan
+      tags:
+      - Loan Controller
+  /loans/{loanId}:
+    patch:
+      parameters:
+      - name: loanId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Update Loan
+      tags:
+      - Loan Controller
+    get:
+      parameters:
+      - name: loanId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Get Loan By Id
+      tags:
+      - Loan Controller
+    delete:
+      parameters:
+      - name: loanId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Delete Book
+      tags:
+      - Loan Controller
+  /reservations:
+    get:
+      responses:
+        "200":
+          description: OK
+      summary: Get Reservations By Filters
+      tags:
+      - Reservation Controller
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReservationDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Create Reservation
+      tags:
+      - Reservation Controller
+  /reservations/{reservationId}:
+    patch:
+      parameters:
+      - name: reservationId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReservationDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Update Reservation
+      tags:
+      - Reservation Controller
+    get:
+      parameters:
+      - name: reservationId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Get Reservation By Id
+      tags:
+      - Reservation Controller
+    delete:
+      parameters:
+      - name: reservationId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+      summary: Delete Book
+      tags:
+      - Reservation Controller
+
+components:
+  schemas:
+    userDTO:
+      required:
+      - name
+      - email
+      - password
+      type: object
+      properties:
+        name:
+          minLength: 1
+          type: string
+          example: Nicolas
+        email:
+          type: string
+          format: email
+          example: nicolas@example.com
+        password:
+          minLength: 1
+          type: string
+          format: password
+          description: Afterwards the password will be hashed.
+          example: 123321
+        role:
+          $ref: "#/components/schemas/UserRole"
+    bookDTO:
+      required:
+      - title
+      - author
+      - isAvailable
+      type: object
+      properties:
+        bookId:
+          $ref: "#/components/schemas/UUID"
+        title:
+          minLength: 1
+          type: string
+        author:
+          minLength: 1
+          type: string
+        isbn:
+          type: string
+          minLength: 1
+          maxLength: 13
+        publicationDate:
+          $ref: "#/components/schemas/Date"
+        isAvailable:
+          type: boolean
+          example: true
+    LoanDTO:
+      required:
+      - userId
+      - bookId
+      - loanDate
+      type: object
+      properties:
+        userId:
+          $ref: "#/components/schemas/UUID"
+          example: a7a53b81-1283-4de0-b532-783fe0916c5e
+        bookId:
+          $ref: "#/components/schemas/UUID"
+          example: 1e2f3a4b-5c6d-4e8f-9a0b-1c2d3e4f5a6b
+        loanDate:
+          $ref: "#/components/schemas/Date"
+          description: Day that book was loaned.
+        loanDueDate:
+          $ref: "#/components/schemas/Date"
+          description: By default will get the actual date + 30 days, if nothing is defined.
+        returnDate:
+          $ref: "#/components/schemas/Date"
+          description: Date that book was return to the library.
+        loanStatus:
+          $ref: "#/components/schemas/LoanStatus"
+          description: | 
+                        When loaned, will be defined as "ACTIVE", when updated the following rules will be applied:
+                        - If the return date is equals the current date OR return date is before current date, then status is "RETURNED"
+                        - If the return date is after loan return date OR (return date is null AND loan due date is after current date), then status is "LATE"
+                        - Else the status is defined by what as defined in update request body, if nothing was defined, catch the actual status before update.
+          example: ACTIVE           
+    ReservationDTO:
+      required:
+      - userId
+      - bookId
+      type: object
+      properties:
+        userId:
+          $ref: "#/components/schemas/UUID"
+        bookId:
+          $ref: "#/components/schemas/UUID"
+        reservationDate:
+          $ref: "#/components/schemas/Date"
+          description: Date that book is beeing reserverd, by default can be null in the request body, it wiil be defined as the currant date.
+        status:
+          $ref: "#/components/schemas/ReservationStatus"
+          description: Status of the reservation, by default can be null in the request body, it will be defined as "PEDING".
+          example: CONFIRMED
+    UserRole:
+      enum:
+      - USER
+      - ADMIN
+      type: string
+    LoanStatus:
+      enum:
+      - ACTIVE
+      - RETURNED
+      - LATE
+      type: string
+    ReservationStatus:
+      enum:
+      - PENDING
+      - CONFIRMED
+      - CANCELED
+      type: string
+    Date:
+      format: date
+      type: string
+      example: 2025-03-10
+    UUID:
+      format: uuid
+      pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+      type: string

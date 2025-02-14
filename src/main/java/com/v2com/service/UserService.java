@@ -152,6 +152,7 @@ public class UserService {
             if (userEntity != null) {
                 userEntity.setName(userDTO.getName() != null ? userDTO.getName() : userEntity.getName());
                 userEntity.setEmail(userDTO.getEmail() != null ? userDTO.getEmail() : userEntity.getEmail());
+                userEntity.setPassword(userDTO.getPassword() != null ? userDTO.getPassword() : userEntity.getPassword());
                 userEntity.setRole(userDTO.getRole() != null ? userDTO.getRole() : userEntity.getRole());
                 
                 userRepository.persist(userEntity);

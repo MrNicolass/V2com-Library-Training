@@ -112,8 +112,13 @@ V2com-Library-Training-api/
 </details>
 </h3>
 
+## How Routes works
+
+> 💡 You can see all the routes and test how they work by accessing http://localhost:8080/q/swagger-ui/ for a better view!
+
+See the routes in the dropdown below:
 <details>
-<summary style='font-size: 1.5em;padding-bottom: .3em;border-bottom: 1px solid #3d444db3;font-weight: 600;line-height: 1.25;color: #fff;'>How it works</summary>
+<summary>Routes</summary>
 
 ### Users
 Users can register, update their information, and delete their accounts. They can also borrow and reserve books.

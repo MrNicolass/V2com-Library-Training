@@ -32,7 +32,6 @@ paths:
           schema:
             type: string
             enum: ["USER", "ADMIN"]
-
       responses:
         "200":
           description: OK!
@@ -55,6 +54,9 @@ paths:
       - User Controller
   /users/{userId}:
     patch:
+      summary: Update User
+      tags:
+      - User Controller
       parameters:
       - name: userId
         in: path
@@ -66,14 +68,33 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/userDTO"
+            examples:
+              updateName:
+                summary: Update only the name
+                value:
+                  name: Andre
+              nameAndEmail:
+                summary: Update name and e-mail
+                value:
+                  name: Andre
+                  email: andremacias@hotmail.com
+              updateAll:
+                summary: Update All
+                value:
+                  name: Andre
+                  email: andremacias@hotmail.com
+                  password: Andre321
+                  role: ADMIN
         required: true
       responses:
         "200":
-          description: OK
-      summary: Update User
+          description: User updated!
+        "404":
+          description: User not found!
+    get:
+      summary: Get User By Id
       tags:
       - User Controller
-    get:
       parameters:
       - name: userId
         in: path
@@ -82,10 +103,9 @@ paths:
           $ref: "#/components/schemas/UUID"
       responses:
         "200":
-          description: OK
-      summary: Get User By Id
-      tags:
-      - User Controller
+          description: User found!
+        "404":
+          description: User not found!
     delete:
       parameters:
       - name: userId
@@ -94,34 +114,77 @@ paths:
         schema:
           $ref: "#/components/schemas/UUID"
       responses:
-        "200":
-          description: OK
+        "410":
+          description: Used deleted!
+        "404":
+          description: User not found!
       summary: Delete User
       tags:
       - User Controller
   /books:
     get:
-      responses:
-        "200":
-          description: OK
       summary: Get Books By Filter
       tags:
       - Book Controller
-    post:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/bookDTO"
-        required: true
+      parameters:
+        - in: query
+          name: Title
+          description: Title of the book(s) beeing searched.
+          schema:
+            type: string
+            example: The Great Gatsby
+        - in: query
+          name: Author
+          description: Author of the book(s) beeing searched.
+          schema:
+            type: string
+            example: F. Scott Fitzgerald
+        - in: query
+          name: ISBN
+          description: ISBN is a code made up of 13 numbers, type only the numbers!
+          schema:
+            type: string
+            example: 9780743273565
+        - in: query
+          name: isAvailable
+          description: Availability of the book.
+          schema:
+            type: boolean
+            example: true
+        - in: query
+          name: publicationDate
+          description: Date that book was published.
+          schema:
+            type: string
+            format: YYYY-MM-DD
+            example: 1925-04-10
       responses:
         "200":
-          description: OK
+          description: Book(s) found!
+        "404":
+          description: Book(s) not found!
+        "406":
+          description: One or more filters are invalid!
+    post:
       summary: Create Book
       tags:
       - Book Controller
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/bookDTO"
+        required: true
+      responses:
+        "201":
+          description: Book created!
+        "406":
+          description: Data is required!
   /books/{bookId}:
     patch:
+      summary: Update Book
+      tags:
+      - Book Controller
       parameters:
       - name: bookId
         in: path
@@ -133,27 +196,33 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/bookDTO"
+            examples:
+              updateTitle:
+                summary: Update only the title
+                value:
+                  title: New Book Title
+              updateAuthor:
+                summary: Update only the author
+                value:
+                  author: New Author Name
+              updateAll:
+                summary: Update all fields
+                value:
+                  title: New Book Title
+                  author: New Author Name
+                  isbn: 1234567890123
+                  publicationDate: 2023-10-01
+                  isAvailable: false
         required: true
       responses:
         "200":
-          description: OK
-      summary: Update Book
-      tags:
-      - Book Controller
+          description: Book updated!
+        "404":
+          description: Book not found!
     get:
-      parameters:
-      - name: bookId
-        in: path
-        required: true
-        schema:
-          $ref: "#/components/schemas/UUID"
-      responses:
-        "200":
-          description: OK
       summary: Get Book By Id
       tags:
       - Book Controller
-    delete:
       parameters:
       - name: bookId
         in: path
@@ -162,33 +231,105 @@ paths:
           $ref: "#/components/schemas/UUID"
       responses:
         "200":
-          description: OK
+          description: Book found!
+        "404":
+          description: Book not found!
+    delete:
       summary: Delete Book
       tags:
       - Book Controller
+      parameters:
+      - name: bookId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "410":
+          description: Book deleted!
+        "404":
+          description: Book not found!
   /loans:
     get:
-      responses:
-        "200":
-          description: OK
       summary: Get Loans By Filters
       tags:
       - Loan Controller
-    post:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LoanDTO"
-        required: true
+      parameters:
+        - in: query
+          name: user
+          description: User ID of the loan(s) being searched.
+          schema:
+            type: string
+            format: uuid
+            example: a7a53b81-1283-4de0-b532-783fe0916c5e
+        - in: query
+          name: book
+          description: Book ID of the loan(s) being searched.
+          schema:
+            type: string
+            format: uuid
+            example: 1e2f3a4b-5c6d-4e8f-9a0b-1c2d3e4f5a6b
+        - in: query
+          name: loanDate
+          description: Date the book was loaned.
+          schema:
+            type: string
+            format: date
+            example: 2025-03-10
+        - in: query
+          name: loanDueDate
+          description: Due date for the loan.
+          schema:
+            type: string
+            format: date
+            example: 2025-04-09
+        - in: query
+          name: returnDate
+          description: Date the book was returned.
+          schema:
+            type: string
+            format: date
+            example: 2025-04-01
+        - in: query
+          name: loanStatus
+          description: Status of the loan.
+          schema:
+            type: string
+            enum: ["ACTIVE", "RETURNED", "LATE"]
+            example: ACTIVE
       responses:
         "200":
-          description: OK
+          description: Loans found!
+        "404":
+          description: Loan(s) not found!
+        "406":
+          description: One or more filters are invalid!
+    post:
       summary: Create Loan
       tags:
       - Loan Controller
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanDTO"
+        required: true
+      responses:
+        "201":
+          description: Loan registered!
+        "404":
+          description: User or book not found!
+        "409":
+          description: User already has a loan!
+        "406":
+          description: Loan date is null!
+        "500":
+          description: Server error
   /loans/{loanId}:
     patch:
+      summary: Update Loan
+      tags:
+      - Loan Controller
       parameters:
       - name: loanId
         in: path
@@ -203,24 +344,15 @@ paths:
         required: true
       responses:
         "200":
-          description: OK
-      summary: Update Loan
-      tags:
-      - Loan Controller
+          description: Loan updated!
+        "404":
+          description: Loan, user, or book not found!
+        "500":
+          description: Server error
     get:
-      parameters:
-      - name: loanId
-        in: path
-        required: true
-        schema:
-          $ref: "#/components/schemas/UUID"
-      responses:
-        "200":
-          description: OK
       summary: Get Loan By Id
       tags:
       - Loan Controller
-    delete:
       parameters:
       - name: loanId
         in: path
@@ -229,33 +361,95 @@ paths:
           $ref: "#/components/schemas/UUID"
       responses:
         "200":
-          description: OK
-      summary: Delete Book
+          description: Loan found!
+        "404":
+          description: Loan not found!
+        "500":
+          description: Server error
+    delete:
+      summary: Delete Loan
       tags:
       - Loan Controller
+      parameters:
+      - name: loanId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "410":
+          description: Loan deleted!
+        "404":
+          description: Loan, user, or book not found!
+        "500":
+          description: Server error
   /reservations:
     get:
-      responses:
-        "200":
-          description: OK
       summary: Get Reservations By Filters
       tags:
       - Reservation Controller
-    post:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ReservationDTO"
-        required: true
+      parameters:
+        - in: query
+          name: user
+          description: User ID of the reservation(s) being searched.
+          schema:
+            type: string
+            format: uuid
+            example: a7a53b81-1283-4de0-b532-783fe0916c5e
+        - in: query
+          name: book
+          description: Book ID of the reservation(s) being searched.
+          schema:
+            type: string
+            format: uuid
+            example: 1e2f3a4b-5c6d-4e8f-9a0b-1c2d3e4f5a6b
+        - in: query
+          name: reservationDate
+          description: Date the book was reserved.
+          schema:
+            type: string
+            format: date
+            example: 2025-03-10
+        - in: query
+          name: status
+          description: Status of the reservation.
+          schema:
+            type: string
+            enum: ["PENDING", "CONFIRMED", "CANCELLED"]
+            example: PENDING
       responses:
         "200":
-          description: OK
+          description: Reservations found!
+        "404":
+          description: Reservation(s) not found!
+        "406":
+          description: One or more filters are invalid!
+    post:
       summary: Create Reservation
       tags:
       - Reservation Controller
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReservationDTO"
+        required: true
+      responses:
+        "201":
+          description: Reservation registered!
+        "404":
+          description: User or book not found!
+        "409":
+          description: Reservation date is null!
+        "403":
+          description: User already has a reservation!
+        "500":
+          description: Server error
   /reservations/{reservationId}:
     patch:
+      summary: Update Reservation
+      tags:
+      - Reservation Controller
       parameters:
       - name: reservationId
         in: path
@@ -270,24 +464,15 @@ paths:
         required: true
       responses:
         "200":
-          description: OK
-      summary: Update Reservation
-      tags:
-      - Reservation Controller
+          description: Reservation updated!
+        "404":
+          description: Reservation, user, or book not found!
+        "500":
+          description: Server error
     get:
-      parameters:
-      - name: reservationId
-        in: path
-        required: true
-        schema:
-          $ref: "#/components/schemas/UUID"
-      responses:
-        "200":
-          description: OK
       summary: Get Reservation By Id
       tags:
       - Reservation Controller
-    delete:
       parameters:
       - name: reservationId
         in: path
@@ -296,10 +481,28 @@ paths:
           $ref: "#/components/schemas/UUID"
       responses:
         "200":
-          description: OK
-      summary: Delete Book
+          description: Reservation found!
+        "404":
+          description: Reservation not found!
+        "500":
+          description: Server error
+    delete:
+      summary: Delete Reservation
       tags:
       - Reservation Controller
+      parameters:
+      - name: reservationId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "410":
+          description: Reservation deleted!
+        "404":
+          description: Reservation, user, or book not found!
+        "500":
+          description: Server error
 
 components:
   schemas:
@@ -333,18 +536,19 @@ components:
       - isAvailable
       type: object
       properties:
-        bookId:
-          $ref: "#/components/schemas/UUID"
         title:
           minLength: 1
           type: string
+          example: Shadow and Bones
         author:
           minLength: 1
           type: string
+          example: Lindsey Macran
         isbn:
           type: string
           minLength: 1
           maxLength: 13
+          example: 1234567891011
         publicationDate:
           $ref: "#/components/schemas/Date"
         isAvailable:

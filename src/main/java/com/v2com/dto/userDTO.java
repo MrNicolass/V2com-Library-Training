@@ -8,6 +8,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 
 public class userDTO {
+
+    //region Parameters
+
     private UUID userId;
 
     @NotEmpty(message = "Name is required")
@@ -21,6 +24,10 @@ public class userDTO {
 
     private UserRole role = UserRole.USER;
 
+    //endregion
+
+    //region Constructors
+
     public userDTO() {
     }
 
@@ -31,6 +38,10 @@ public class userDTO {
         this.password = password;
         this.role = role;
     }
+
+    //endregion
+
+    //region Getters and Setters
 
     public UUID getUserId() {
         return userId;
@@ -71,4 +82,7 @@ public class userDTO {
     public void setRole(UserRole role) {
         this.role = role;
     }
+
+    //endregion
+
 }

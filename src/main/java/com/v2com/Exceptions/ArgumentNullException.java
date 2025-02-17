@@ -6,4 +6,8 @@ public class ArgumentNullException extends Exception {
         super(String.format("%s is required!", argument));
     }
 
+    public ArgumentNullException(Boolean isUpdate) {
+        super("You can't update your profile without define at least one parameter!");
+    }
+
 }

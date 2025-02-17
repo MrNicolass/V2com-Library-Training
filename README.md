@@ -112,7 +112,13 @@ V2com-Library-Training-api/
 </details>
 </h3>
 
-## How it works
+## How Routes works
+
+> 💡 You can see all the routes and test how they work by accessing http://localhost:8080/q/swagger-ui/ for a better view!
+
+See the routes in the dropdown below:
+<details>
+<summary>Routes</summary>
 
 ### Users
 Users can register, update their information, and delete their accounts. They can also borrow and reserve books.
@@ -156,13 +162,16 @@ Users can reserve books, and the system tracks the reservation status.
     - `PATCH /reservations/{id}` - Update reservation information;
     - `DELETE /reservations/{id}` - Delete a reservation.
 
+</details>
+
 ## Libraries Used
 
 - Quarkus;
 - JUnit;
 - RESTEasy;
 - Hibernate ORM;
-- Docker.
+- Docker;
+- OpenAPI.
 
 ## `.env` Configuration
 
@@ -172,7 +181,8 @@ Create a `.env` file in the root of the project with the following variables:
 POSTGRES_DB=library
 POSTGRES_USER=your_own_db_user
 POSTGRES_PASSWORD=your_own_db_password
-QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://db:5432/library
+QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://localhost:5432/library
+QUARKUS_DATASOURCE_JDBC_URL_DOCKER=jdbc:postgresql://db:5432/library
 QUARKUS_DATASOURCE_USERNAME=your_own_db_user
 QUARKUS_DATASOURCE_PASSWORD=your_own_db_user
 ```
@@ -210,14 +220,12 @@ On both ways to start the program, execute commands in root folder:
 
 ### With Maven/Quarkus from the Terminal
 
-1. If you've created a `.env` file before, renamit or exclude to execute program in dev mode.
-
-2. Create the project .jar:
+1. Create the project .jar:
     ```sh
     ./mvnw package -DskipTests
     ```
 
-3. Run the project:
+2. Run the project:
     ```sh
     ./mvnw quarkus:dev
     ```

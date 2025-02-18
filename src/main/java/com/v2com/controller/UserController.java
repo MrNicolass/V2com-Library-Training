@@ -5,12 +5,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.v2com.Exceptions.ArgumentNullException;
-import com.v2com.Exceptions.FilterInvalidException;
-import com.v2com.Exceptions.UserNotFoundException;
 import com.v2com.dto.userDTO;
+import com.v2com.exceptions.ArgumentNullException;
+import com.v2com.exceptions.FilterInvalidException;
+import com.v2com.exceptions.UserNotFoundException;
 import com.v2com.service.UserService;
 
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -38,6 +40,7 @@ public class UserController {
 
     @POST
     @Transactional
+    @PermitAll
     public Response createUser(userDTO userEntity) {
         try {
             Map<String, Object> response = new HashMap<>();
@@ -54,6 +57,7 @@ public class UserController {
 
     @GET
     @Transactional
+    @RolesAllowed("ADMIN")
     @Path("/{userId}")
     public Response getUserById(@PathParam("userId") UUID userId) {
         try {
@@ -71,6 +75,7 @@ public class UserController {
 
     @GET
     @Transactional
+    @RolesAllowed("ADMIN")
     public Response getUsersByFilter(@Context UriInfo uriInfo) {
         try {
             Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
@@ -87,6 +92,7 @@ public class UserController {
 
     @DELETE
     @Transactional
+    @RolesAllowed("ADMIN")
     @Path("/{userId}")
     public Response deleteUser(@PathParam("userId") UUID userId) {
         try {
@@ -104,6 +110,7 @@ public class UserController {
 
     @PATCH
     @Transactional
+    @PermitAll
     @Path("/{userId}")
     public Response updateUser(@PathParam("userId") UUID userId, userDTO userDTO) {
         try {

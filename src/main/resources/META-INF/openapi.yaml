@@ -9,6 +9,28 @@ servers:
 - url: /api/v1
 
 paths:
+  /auth/login:
+    post:
+      summary: Login
+      tags:
+      - Auth Controller
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          description: User not found!
+        "406":
+          description: Password is incorrect!
   /users:
     get:
       summary: Get Users By Filter
@@ -35,11 +57,18 @@ paths:
       responses:
         "200":
           description: OK!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: User not found!
         "406":
           description: One or more filters are invalid!
     post:
+      summary: Create User
+      tags:
+      - User Controller
       requestBody:
         content:
           application/json:
@@ -47,11 +76,14 @@ paths:
               $ref: "#/components/schemas/userDTO"
         required: true
       responses:
-        "200":
-          description: OK
-      summary: Create User
-      tags:
-      - User Controller
+        "201":
+          description: User created!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "406":
+          description: Some of the required data is missing!
   /users/{userId}:
     patch:
       summary: Update User
@@ -89,6 +121,10 @@ paths:
       responses:
         "200":
           description: User updated!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: User not found!
     get:
@@ -104,6 +140,10 @@ paths:
       responses:
         "200":
           description: User found!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: User not found!
     delete:
@@ -116,6 +156,10 @@ paths:
       responses:
         "410":
           description: Used deleted!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: User not found!
       summary: Delete User
@@ -128,19 +172,19 @@ paths:
       - Book Controller
       parameters:
         - in: query
-          name: Title
+          name: title
           description: Title of the book(s) beeing searched.
           schema:
             type: string
             example: The Great Gatsby
         - in: query
-          name: Author
+          name: author
           description: Author of the book(s) beeing searched.
           schema:
             type: string
             example: F. Scott Fitzgerald
         - in: query
-          name: ISBN
+          name: isbn
           description: ISBN is a code made up of 13 numbers, type only the numbers!
           schema:
             type: string
@@ -161,6 +205,10 @@ paths:
       responses:
         "200":
           description: Book(s) found!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Book(s) not found!
         "406":
@@ -178,6 +226,10 @@ paths:
       responses:
         "201":
           description: Book created!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "406":
           description: Data is required!
   /books/{bookId}:
@@ -217,6 +269,10 @@ paths:
       responses:
         "200":
           description: Book updated!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Book not found!
     get:
@@ -232,6 +288,10 @@ paths:
       responses:
         "200":
           description: Book found!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Book not found!
     delete:
@@ -247,6 +307,10 @@ paths:
       responses:
         "410":
           description: Book deleted!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Book not found!
   /loans:
@@ -300,6 +364,10 @@ paths:
       responses:
         "200":
           description: Loans found!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Loan(s) not found!
         "406":
@@ -317,6 +385,10 @@ paths:
       responses:
         "201":
           description: Loan registered!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: User or book not found!
         "409":
@@ -345,6 +417,10 @@ paths:
       responses:
         "200":
           description: Loan updated!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Loan, user, or book not found!
         "500":
@@ -362,6 +438,10 @@ paths:
       responses:
         "200":
           description: Loan found!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Loan not found!
         "500":
@@ -379,6 +459,10 @@ paths:
       responses:
         "410":
           description: Loan deleted!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Loan, user, or book not found!
         "500":
@@ -420,6 +504,10 @@ paths:
       responses:
         "200":
           description: Reservations found!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Reservation(s) not found!
         "406":
@@ -437,6 +525,10 @@ paths:
       responses:
         "201":
           description: Reservation registered!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: User or book not found!
         "409":
@@ -465,6 +557,10 @@ paths:
       responses:
         "200":
           description: Reservation updated!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Reservation, user, or book not found!
         "500":
@@ -482,6 +578,10 @@ paths:
       responses:
         "200":
           description: Reservation found!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Reservation not found!
         "500":
@@ -499,13 +599,36 @@ paths:
       responses:
         "410":
           description: Reservation deleted!
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           description: Reservation, user, or book not found!
         "500":
           description: Server error
-
 components:
+  responses:
+    UnauthorizedError:
+      description: Unauthorized access... You must login first! 
+    ForbiddenError:
+      description: Forbidden access... You must be an Administrator to execute this!
   schemas:
+    LoginDTO:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: nicolas@example.com
+        password:
+          minLength: 1
+          type: string
+          format: password
+          example: 123321
     userDTO:
       required:
       - name
@@ -626,3 +749,10 @@ components:
       format: uuid
       pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
       type: string
+  securitySchemes:
+    SecurityScheme:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - SecurityScheme: []

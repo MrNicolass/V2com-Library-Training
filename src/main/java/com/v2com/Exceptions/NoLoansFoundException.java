@@ -1,4 +1,4 @@
-package com.v2com.Exceptions;
+package com.v2com.exceptions;
 
 import java.util.UUID;
 

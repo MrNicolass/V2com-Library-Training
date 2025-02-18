@@ -5,16 +5,18 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.v2com.Exceptions.UserAlreadyLoanedException;
-import com.v2com.Exceptions.BookNotFoundException;
-import com.v2com.Exceptions.FilterInvalidException;
-import com.v2com.Exceptions.LoanDateIsNullException;
-import com.v2com.Exceptions.LoanNotFoundException;
-import com.v2com.Exceptions.OtherUserLoaned;
-import com.v2com.Exceptions.UserNotFoundException;
 import com.v2com.dto.LoanDTO;
+import com.v2com.exceptions.BookNotFoundException;
+import com.v2com.exceptions.FilterInvalidException;
+import com.v2com.exceptions.LoanDateIsNullException;
+import com.v2com.exceptions.LoanNotFoundException;
+import com.v2com.exceptions.OtherUserLoanedException;
+import com.v2com.exceptions.UserAlreadyLoanedException;
+import com.v2com.exceptions.UserNotFoundException;
 import com.v2com.service.LoanService;
 
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -42,6 +44,7 @@ public class LoanController {
 
     @POST
     @Transactional
+    @PermitAll
     public Response createLoan(LoanDTO loan){
         try {
             Map<String, Object> response = new HashMap<>();
@@ -54,7 +57,7 @@ public class LoanController {
             return Response.status(409).entity(loaned.getMessage()).build();
         } catch (LoanDateIsNullException loanDate) {
             return Response.status(406).entity(loanDate.getMessage()).build();
-        } catch (OtherUserLoaned reservation) {
+        } catch (OtherUserLoanedException reservation) {
             return Response.status(201).entity(reservation.getMessage()).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
@@ -63,6 +66,7 @@ public class LoanController {
 
     @GET
     @Transactional
+    @PermitAll
     @Path("/{loanId}")
     public Response getLoanById(@PathParam("loanId") UUID loanId){
         try {
@@ -79,6 +83,7 @@ public class LoanController {
 
     @GET
     @Transactional
+    @PermitAll
     public Response getLoansByFilters(@Context UriInfo uriInfo) {
         try {
             Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
@@ -95,8 +100,9 @@ public class LoanController {
 
     @DELETE
     @Transactional
+    @PermitAll
     @Path("/{loanId}")
-    public Response deleteBook(@PathParam("loanId") UUID loanId) {
+    public Response deleteLoan(@PathParam("loanId") UUID loanId) {
         try {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Loan deleted!");
@@ -111,6 +117,7 @@ public class LoanController {
 
     @PATCH
     @Transactional
+    @RolesAllowed("ADMIN")
     @Path("/{loanId}")
     public Response updateLoan(@PathParam("loanId") UUID loanId, LoanDTO loanDTO) {
         try {

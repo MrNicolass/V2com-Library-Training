@@ -3,35 +3,33 @@ setlocal
 
 cls
 
-:: Parar containers existentes
-echo Parando containers Docker...
+echo Stopping Docker containers...
 docker-compose down -v
 if %ERRORLEVEL% neq 0 (
-    echo Erro ao parar os containers Docker.
+    echo Error while stopping Docker containers.
     exit /b %ERRORLEVEL%
 )
 
-:: Executar comandos
-echo Executando Maven Build...
+echo Executing Maven Build...
 call mvnw.cmd clean package -DskipTests
 if %ERRORLEVEL% neq 0 (
     echo Erro ao executar Maven Build.
     exit /b %ERRORLEVEL%
 )
 
-echo Construindo imagem Docker...
+echo Buildiong Docker image...
 docker build -f src/main/docker/Dockerfile.jvm -t quarkus/library-jvm:1.0.2-SNAPSHOT .
 if %ERRORLEVEL% neq 0 (
-    echo Erro ao construir a imagem Docker.
+    echo Error while building Docker image.
     exit /b %ERRORLEVEL%
 )
 
-echo Iniciando containers com Docker Compose...
+echo Starting containers with Docker Compose...
 docker-compose up
 if %ERRORLEVEL% neq 0 (
-    echo Erro ao iniciar os containers Docker.
+    echo Error while starting containers.
     exit /b %ERRORLEVEL%
 )
 
-echo Processo concluído com sucesso!
+echo Proccess concluded with success!
 endlocal

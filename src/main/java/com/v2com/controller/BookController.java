@@ -5,12 +5,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.v2com.Exceptions.ArgumentNullException;
-import com.v2com.Exceptions.BookNotFoundException;
-import com.v2com.Exceptions.FilterInvalidException;
 import com.v2com.dto.bookDTO;
+import com.v2com.exceptions.ArgumentNullException;
+import com.v2com.exceptions.BookNotFoundException;
+import com.v2com.exceptions.FilterInvalidException;
 import com.v2com.service.BookService;
 
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -38,6 +40,7 @@ public class BookController {
 
     @POST
     @Transactional
+    @RolesAllowed("ADMIN")
     public Response createBook(bookDTO bookEntity) {
         try {
             Map<String, Object> response = new HashMap<>();
@@ -54,6 +57,7 @@ public class BookController {
 
     @GET
     @Transactional
+    @PermitAll
     @Path("/{bookId}")
     public Response getBookById(@PathParam("bookId") UUID bookId) {
         try {
@@ -71,6 +75,7 @@ public class BookController {
 
     @GET
     @Transactional
+    @PermitAll
     public Response getBooksByFilter(@Context UriInfo uriInfo) {
         try {
             Map<String, String> filters = uriInfo.getQueryParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
@@ -87,6 +92,7 @@ public class BookController {
 
     @DELETE
     @Transactional
+    @RolesAllowed("ADMIN")
     @Path("/{bookId}")
     public Response deleteBook(@PathParam("bookId") UUID bookId) {
         try {
@@ -104,6 +110,7 @@ public class BookController {
 
     @PATCH
     @Transactional
+    @RolesAllowed("ADMIN")
     @Path("/{bookId}")
     public Response updateBook(@PathParam("bookId") UUID bookId, bookDTO bookDTO) {
         try {

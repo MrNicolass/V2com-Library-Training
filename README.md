@@ -53,6 +53,11 @@ V2com-Library-Training-api/
 
 > 💡 Below, some entities receive other entities in there structure, like `Loan`, tha receive `User` and `book`. In the database they were recorded as UUID's, but in code/ORM on moust routes is sent a DTO with UUID's and recorded by using entities/objects.
 
+Below it's possible to find the written and image description:
+
+<details>
+<summary>Diagram</summary>
+
 #### Book
 - **Attributes:**
     - `id` (UUID): Unique identifier for the book.
@@ -103,14 +108,14 @@ V2com-Library-Training-api/
     - Many-to-One with `Book`: A reservation is associated with one book.
     - Many-to-One with `User`: A reservation is associated with one user.
 
-<h3>
+</details>
+
 <details>
 <summary>Example image of the Diagram</summary>
 
 ![Project Diagram](diagram.png)
 
 </details>
-</h3>
 
 ## How Routes works
 
@@ -166,12 +171,16 @@ Users can reserve books, and the system tracks the reservation status.
 
 ## Libraries Used
 
-- Quarkus;
-- JUnit;
-- RESTEasy;
-- Hibernate ORM;
-- Docker;
-- OpenAPI.
+- [Quarkus](https://quarkus.io/);
+- [JUnit](https://junit.org/junit5/);
+- [RESTEasy](https://resteasy.github.io/);
+- [Hibernate ORM](https://hibernate.org/orm/);
+- [Docker](https://www.docker.com/);
+- [JDBC PostgreSQL](https://jdbc.postgresql.org/);
+- [Flyway](https://flywaydb.org/);
+- [SmallRye OpenAPI](https://smallrye.io/smallrye-open-api/);
+- [SmallRye JWT](https://smallrye.io/smallrye-jwt/);
+- [SmallRye JWT Build](https://smallrye.io/smallrye-jwt-build/).
 
 ## `.env` Configuration
 

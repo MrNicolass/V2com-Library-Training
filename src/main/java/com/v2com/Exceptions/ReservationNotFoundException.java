@@ -1,4 +1,4 @@
-package com.v2com.Exceptions;
+package com.v2com.exceptions;
 
 public class ReservationNotFoundException extends Exception {
     

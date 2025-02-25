@@ -3,19 +3,19 @@ package com.v2com.service;
 import com.v2com.entity.LoanEntity;
 import com.v2com.entity.UserEntity;
 import com.v2com.entity.enums.LoanStatus;
-import com.v2com.exceptions.BookNotFoundException;
-import com.v2com.exceptions.FilterInvalidException;
-import com.v2com.exceptions.LoanDateIsNullException;
-import com.v2com.exceptions.LoanNotFoundException;
-import com.v2com.exceptions.OtherUserLoanedException;
-import com.v2com.exceptions.UserAlreadyLoanedException;
-import com.v2com.exceptions.UserNotFoundException;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.v2com.Exceptions.BookNotFoundException;
+import com.v2com.Exceptions.FilterInvalidException;
+import com.v2com.Exceptions.LoanDateIsNullException;
+import com.v2com.Exceptions.LoanNotFoundException;
+import com.v2com.Exceptions.OtherUserLoanedException;
+import com.v2com.Exceptions.UserAlreadyLoanedException;
+import com.v2com.Exceptions.UserNotFoundException;
 import com.v2com.dto.LoanDTO;
 import com.v2com.dto.ReservationDTO;
 import com.v2com.entity.BookEntity;

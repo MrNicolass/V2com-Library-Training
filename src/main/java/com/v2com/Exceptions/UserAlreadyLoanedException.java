@@ -1,4 +1,4 @@
-package com.v2com.exceptions;
+package com.v2com.Exceptions;
 
 public class UserAlreadyLoanedException extends Exception {
     
